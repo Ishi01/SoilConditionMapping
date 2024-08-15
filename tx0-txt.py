@@ -6,7 +6,7 @@ Created on  August 15  2024
 
 import os
 
-# 使用当前工作目录作为输入和输出文件夹路径
+# You can change teh input and output path , here I am using current directory 使用当前工作目录作为输入和输出文件夹路径
 current_folder = os.getcwd()
 input_folder = current_folder
 output_folder = os.path.join(current_folder, 'output')
