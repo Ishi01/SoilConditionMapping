@@ -43,6 +43,13 @@ def inversion(start=[0,0], end=[47, -8], quality=33.5, area=0.5, work_dir="/User
 
     """ Begin Inversion """
 
+    """ 
+    - line24-27 & line52-59:
+    this place is reading `tx0` files and doing the inversion, 
+    but now we should change to read the intergrated file(includding the txt and temprature data) and  then do the inversion
+    
+    - after that, it should be identical to line64 to load the intergrated file, then use the `mgr.invert` to plot the result
+    """
     for i in range(0, len(entries_sel) - 1):
 
         date = entries_sel[i]
@@ -158,3 +165,10 @@ def inversion(start=[0,0], end=[47, -8], quality=33.5, area=0.5, work_dir="/User
     plt.show()
 
     return fig1
+  
+  
+  """
+  need to fix:
+  ensuring the input parameters are provided from UI
+  ensuring the output is returned to UI
+  """
