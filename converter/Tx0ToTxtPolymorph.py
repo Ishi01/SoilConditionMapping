@@ -42,6 +42,7 @@ class Tx0ToTxtConverter:
         return electrode_data
 
     def process_measurement_data(self, lines):
+        """This method is shared and parses common data fields."""
         measurement_data = []
         measurement_start = False
         for line in lines:
@@ -52,12 +53,33 @@ class Tx0ToTxtConverter:
                 parts = line.split()
                 if len(parts) < 22:
                     continue
-                a, b, m, n = parts[1], parts[2], parts[3], parts[4]
+                a, b, m, n = int(parts[1]), int(parts[2]), int(parts[3]), int(parts[4])
                 rho = parts[10]
-                x = parts[18]
-                z = parts[20]
-                measurement_data.append(f"{a} {b} {m} {n} {rho} {x} {z}")
+                measurement_data.append(self.format_measurement_data(a, b, m, n, rho, parts))
         return measurement_data
+
+    def correct_offsets(self, measurement_data):
+        """Corrects the offset of electrode indices to start from 1 based on actual data."""
+        if measurement_data:
+            first_a = min(data[0] for data in measurement_data)
+            offset = first_a - 1  # Calculate offset to normalize to 1
+
+            corrected_data = []
+            for data in measurement_data:
+                a, b, m, n = data[:4]
+                corrected_data.append(self.format_corrected_data(a - offset, b - offset, m - offset, n - offset, data[4:]))
+        return corrected_data
+
+    def format_measurement_data(self, a, b, m, n, rho, parts):
+        """Formats the measurement data for writing, including x and z coordinates."""
+        x = parts[18]
+        z = parts[20]
+        return (a, b, m, n, rho, x, z)
+
+    def format_corrected_data(self, a_new, b_new, m_new, n_new, rest_data):
+        """Formats corrected data for output including x and z coordinates."""
+        rho, x, z = rest_data
+        return f"{a_new} {b_new} {m_new} {n_new} {rho} {x} {z}"
 
     def write_output_file(self, output_file_path, electrode_data, measurement_data):
         with open(output_file_path, 'w', encoding='utf-8') as output_file:
@@ -69,63 +91,48 @@ class Tx0ToTxtConverter:
             output_file.write(f"{len(measurement_data)}# Number of data\n")
             output_file.write("# a b m n rhoa x z\n")
             for line in measurement_data:
-                output_file.write(f"{line}\n")
+                output_file.write(line + "\n")
 
     def process_file(self, filename):
         lines = self.read_input_file(filename)
         electrode_data = self.process_electrode_data(lines)
         measurement_data = self.process_measurement_data(lines)
+        measurement_data = self.correct_offsets(measurement_data)  # Correct offsets to start from 1
         output_file_name = filename.replace('.tx0', '.txt')
         output_file_path = os.path.join(self.output_folder, output_file_name)
         self.write_output_file(output_file_path, electrode_data, measurement_data)
         print(f"Data extraction and conversion completed for {filename}.")
 
 
-class OffsetCorrectorTx0ToTxtConverter(Tx0ToTxtConverter):
-    def process_measurement_data(self, lines):
-        measurement_data = super().process_measurement_data(lines)
-        if measurement_data:
-            first_a = int(measurement_data[0].split()[0])
-            if first_a != 1:
-                offset = first_a - 1
-                corrected_data = []
-                for line in measurement_data:
-                    parts = line.split()
-                    a, b, m, n = int(parts[0]) - offset, int(parts[1]) - offset, int(parts[2]) - offset, int(
-                        parts[3]) - offset
-                    new_line = f"{a} {b} {m} {n} {parts[4]} {parts[5]} {parts[6]}"
-                    corrected_data.append(new_line)
-                measurement_data = corrected_data
-        return measurement_data
-
-
 class NoXZTx0ToTxtConverter(Tx0ToTxtConverter):
-    def process_measurement_data(self, lines):
-        measurement_data = []
-        measurement_start = False
-        for line in lines:
-            if '* Data' in line and '*******************' in line:
-                measurement_start = True
-                continue
-            if measurement_start and line.strip() and not line.startswith('*'):
-                parts = line.split()
-                if len(parts) < 22:
-                    continue
-                a, b, m, n = parts[1], parts[2], parts[3], parts[4]
-                rho = parts[10]
-                measurement_data.append(f"{a} {b} {m} {n} {rho}")
-        return measurement_data
+    def format_measurement_data(self, a, b, m, n, rho, parts):
+        """Formats the measurement data without x and z coordinates."""
+        return (a, b, m, n, rho)
 
+    def format_corrected_data(self, a_new, b_new, m_new, n_new, rest_data):
+        """Formats corrected data for output without x and z coordinates."""
+        rho = rest_data[0]
+        return f"{a_new} {b_new} {m_new} {n_new} {rho}"
+
+    def write_output_file(self, output_file_path, electrode_data, measurement_data):
+        with open(output_file_path, 'w', encoding='utf-8') as output_file:
+            output_file.write(f"{len(electrode_data)}# Number of electrodes\n")
+            output_file.write("# x z\n")
+            for line in electrode_data:
+                output_file.write(line + "\n")
+
+            output_file.write(f"{len(measurement_data)}# Number of data\n")
+            output_file.write("# a b m n rhoa\n")
+            for line in measurement_data:
+                output_file.write(line + "\n")
 
 def main():
     current_folder = os.getcwd()
     input_folder = current_folder
-    output_folder = os.path.join(current_folder, '../output')
+    output_folder = os.path.join(current_folder, '../data/temperature_data')
 
-    # You can use any of the following converters
     converters = [
         Tx0ToTxtConverter(input_folder, output_folder),
-        OffsetCorrectorTx0ToTxtConverter(input_folder, output_folder),
         NoXZTx0ToTxtConverter(input_folder, output_folder)
     ]
 
