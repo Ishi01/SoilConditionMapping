@@ -1,18 +1,29 @@
+import os
+import pandas as pd
+import numpy as np
+
 def load_temperature_data(temperature_file):
     # Load temperature data from file
     # 从文件加载温度数据
     print(f"Loading temperature data from {temperature_file}")
-    temperature_data = pd.read_csv(temperature_file, sep="\t", parse_dates=['time'])
-    # Extract date
-    # 提取日期
-    temperature_data['date'] = temperature_data['time'].dt.date
-    temperature_dict = {}
-    # Group by date and store in dictionary
-    # 按日期分组并存储在字典中
-    for date, group in temperature_data.groupby('date'):
-        temperature_dict[date] = group
-    print(f"Loaded temperature data for {len(temperature_dict)} days.")
-    return temperature_dict
+    try:
+        temperature_data = pd.read_csv(temperature_file, sep="\t", parse_dates=['time'])
+        # Extract date
+        # 提取日期
+        temperature_data['date'] = temperature_data['time'].dt.date
+        temperature_dict = {}
+        # Group by date and store in dictionary
+        # 按日期分组并存储在字典中
+        for date, group in temperature_data.groupby('date'):
+            temperature_dict[date] = group
+        print(f"Loaded temperature data for {len(temperature_dict)} days.")
+        return temperature_dict
+    except FileNotFoundError:
+        print(f"Temperature file {temperature_file} not found.")
+        return {}
+    except Exception as e:
+        print(f"Error loading file: {e}")
+        return {}
 
 def interpolate_temperature(z, depths, temperatures):
     # Interpolate temperature for a given depth
@@ -37,13 +48,8 @@ def apply_calibration(resistivity, temperature):
 def process_files(data_dir, output_dir, output_dir2, temperature_dict):
     # Ensure output directories exist
     # 确保输出目录存在
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-        print(f"Created output directory: {output_dir}")
-
-    if not os.path.exists(output_dir2):
-        os.makedirs(output_dir2)
-        print(f"Created output directory: {output_dir2}")
+    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(output_dir2, exist_ok=True)
 
     depths = [-4, -3.5, -3, -1.5, -1, -0.5]  # Temperature measurement depths
                                              # 温度测量深度
@@ -53,65 +59,70 @@ def process_files(data_dir, output_dir, output_dir2, temperature_dict):
             file_path = os.path.join(data_dir, file_name)
             print(f"Processing file: {file_name}")
 
-            # Read file header
-            # 读取文件头
-            with open(file_path, 'r') as f:
-                header_lines = [next(f) for _ in range(51)]
+            try:
+                # Read file header
+                # 读取文件头
+                with open(file_path, 'r') as f:
+                    header_lines = [next(f) for _ in range(51)]
 
-            # Read data section
-            # 读取数据部分
-            data = pd.read_csv(file_path, skiprows=52, delim_whitespace=True, 
-                               names=['a', 'b', 'm', 'n', 'resistivity', 'x', 'z'])
-            data['z'] = pd.to_numeric(data['z'], errors='coerce')
-            data['resistivity'] = pd.to_numeric(data['resistivity'], errors='coerce')
+                # Read data section
+                # 读取数据部分
+                data = pd.read_csv(file_path, skiprows=52, delim_whitespace=True,
+                                   names=['a', 'b', 'm', 'n', 'resistivity', 'x', 'z'])
+                data['z'] = pd.to_numeric(data['z'], errors='coerce')
+                data['resistivity'] = pd.to_numeric(data['resistivity'], errors='coerce')
 
-            # Extract date from filename
-            # 从文件名提取日期
-            date_str = file_name.split('_')[0]
-            date = pd.to_datetime(date_str).date()
-            print(f"Extracted date: {date}")
+                # Extract date from filename
+                # 从文件名提取日期
+                date_str = file_name.split('_')[0]
+                date = pd.to_datetime(date_str).date()
+                print(f"Extracted date: {date}")
 
-            if date in temperature_dict:
-                temp_data = temperature_dict[date]
-                temperatures = temp_data.iloc[0, 1:7].values.astype(float)
-                print(f"Temperatures for {date}: {temperatures}")
-                
-                # Interpolate temperatures and correct resistivity
-                # 插值温度并校正电阻率
-                data['interpolated_temperature'] = data['z'].apply(lambda z: interpolate_temperature(z, depths, temperatures))
-                data['corrected_resistivity'] = data.apply(lambda row: apply_calibration(row['resistivity'], row['interpolated_temperature']), axis=1)
-                
-                # Save detailed output
-                # 保存详细输出
-                output_file_path = os.path.join(output_dir, file_name)
-                output_file_path2 = os.path.join(output_dir2, file_name)
+                if date in temperature_dict:
+                    temp_data = temperature_dict[date]
+                    temperatures = temp_data.iloc[0, 1:7].values.astype(float)
+                    print(f"Temperatures for {date}: {temperatures}")
 
-                with open(output_file_path, 'w') as f:
-                    f.writelines(header_lines)
-                    f.write("# a    b    m    n    resistivity    x    z    interpolated_temperature    corrected_resistivity\n")
-                    data.to_csv(f, sep='\t', index=False, header=False, float_format='%g')  # Keep integers as integers
-                                                                                            # 保持整数格式
+                    # Interpolate temperatures and correct resistivity
+                    # 插值温度并校正电阻率
+                    data['interpolated_temperature'] = data['z'].apply(lambda z: interpolate_temperature(z, depths, temperatures))
+                    data['corrected_resistivity'] = data.apply(lambda row: apply_calibration(row['resistivity'], row['interpolated_temperature']), axis=1)
 
-                # Save simplified output
-                # 保存简化输出
-                with open(output_file_path2, 'w') as f:
-                    f.writelines(header_lines)
-                    f.write("# a    b    m    n    rhoa\n")
-                    for _, row in data.iterrows():
-                        f.write(f"{int(row['a']):>6}\t{int(row['b']):>6}\t{int(row['m']):>6}\t{int(row['n']):>6}\t{row['corrected_resistivity']:>15.2f}\n")
+                    # Save detailed output
+                    # 保存详细输出
+                    output_file_path = os.path.join(output_dir, file_name)
+                    output_file_path2 = os.path.join(output_dir2, file_name)
 
-                print(f"Processed and saved: {output_file_path}")
-                print(f"Processed and saved: {output_file_path2}")
-            else:
-                print(f"No temperature data available for the date in {file_name}")
+                    with open(output_file_path, 'w') as f:
+                        f.writelines(header_lines)
+                        f.write("# a    b    m    n    resistivity    x    z    interpolated_temperature    corrected_resistivity\n")
+                        data.to_csv(f, sep='\t', index=False, header=False, float_format='%g')  # Keep integers as integers
+                                                                                                # 保持整数格式
+
+                    # Save simplified output
+                    # 保存简化输出
+                    with open(output_file_path2, 'w') as f:
+                        f.writelines(header_lines)
+                        f.write("# a    b    m    n    rhoa\n")
+                        for _, row in data.iterrows():
+                            f.write(f"{int(row['a']):>6}\t{int(row['b']):>6}\t{int(row['m']):>6}\t{int(row['n']):>6}\t{row['corrected_resistivity']:>15.2f}\n")
+
+                    print(f"Processed and saved: {output_file_path}")
+                    print(f"Processed and saved: {output_file_path2}")
+                else:
+                    print(f"No temperature data available for the date in {file_name}")
+            except FileNotFoundError:
+                print(f"Data file {file_name} not found")
+            except Exception as e:
+                print(f"Error loading {file_name}: {e}")
 
 # Main program
 # 主程序
-data_dir = "02GNres2check"  # Input data directory
+data_dir = "raw_resistivity_data"  # Input data directory
                             # 输入数据目录
-output_dir = "03bertTCdetail"  # Detailed output directory
+output_dir = "corrected_resistivity_detailed"  # Detailed output directory
                                # 详细输出目录
-output_dir2 = "03bertTC"  # Simplified output directory
+output_dir2 = "corrected_resistivity_simplified"  # Simplified output directory
                           # 简化输出目录
 temperature_file = "Newtem.txt"  # Temperature data file
                                  # 温度数据文件

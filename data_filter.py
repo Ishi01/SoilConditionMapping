@@ -23,7 +23,7 @@ def filter_temperature_data(temperature_file, dates, output_file):
     filtered_df.to_csv(output_file, sep="\t", index=False)
 
 # Directory containing the txt files
-data_dir = "./02GNres2check"
+data_dir = "raw_resistivity_data"
 # Path to the original temperature file
 temperature_file = "./tmp/GNtemp.txt"
 # Path to save the filtered temperature data
