@@ -120,7 +120,7 @@ class NoXZTx0ToTxtConverter(Tx0ToTxtConverter):
 def main():
     current_folder = os.getcwd()
     input_folder = current_folder
-    output_folder = os.path.join(current_folder, 'output')
+    output_folder = os.path.join(current_folder, '../output')
 
     # You can use any of the following converters
     converters = [

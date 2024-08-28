@@ -95,7 +95,7 @@ def process_files(data_dir, output_dir, output_dir2, temperature_dict):
 
                     with open(output_file_path, 'w') as f:
                         f.writelines(header_lines)
-                        f.write("# a    b    m    n    resistivity    x    z    interpolated_temperature    corrected_resistivity\n")
+                        f.write("# a    b   m   n   resistivity x   z   interpolated_temperature    corrected_resistivity\n")
                         data.to_csv(f, sep='\t', index=False, header=False, float_format='%g')  # Keep integers as integers
                                                                                                 # 保持整数格式
 
