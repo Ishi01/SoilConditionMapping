@@ -103,10 +103,10 @@ def process_files(data_dir, output_dir, output_dir2, temperature_dict):
 
 
 # Main program
-resist_data_dir = Path("data/converted_txt_data")
-output_dir = Path("data/corrected_resistivity_detailed")
-output_dir2 = Path("data/corrected_resistivity_simplified")
-temperature_file = Path("data/temperature_data/Newtem.txt")
+resist_data_dir = Path("data/tmp/txt_files")
+output_dir = Path("outputs/corrected_resistivity_detailed")
+output_dir2 = Path("outputs/corrected_resistivity_simplified")
+temperature_file = Path("data/tmp/temperature_data/Newtem.txt")
 
 temperature_dict = load_temperature_data(temperature_file)
 process_files(resist_data_dir, output_dir, output_dir2, temperature_dict)
