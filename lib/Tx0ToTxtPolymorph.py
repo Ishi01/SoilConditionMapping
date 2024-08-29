@@ -126,22 +126,3 @@ class NoXZTx0ToTxtConverter(Tx0ToTxtConverter):
             for line in measurement_data:
                 output_file.write(line + "\n")
 
-def main():
-    current_folder = os.getcwd()
-    input_folder = current_folder
-    output_folder = os.path.join(current_folder, 'data/tmp/temperature_data')
-
-    converters = [
-        Tx0ToTxtConverter(input_folder, output_folder),
-        NoXZTx0ToTxtConverter(input_folder, output_folder)
-    ]
-
-    for converter in converters:
-        converter.ensure_output_folder_exists()
-        for filename in os.listdir(input_folder):
-            if filename.endswith('.tx0'):
-                converter.process_file(filename)
-
-
-if __name__ == "__main__":
-    main()

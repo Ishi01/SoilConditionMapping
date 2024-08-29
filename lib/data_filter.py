@@ -26,11 +26,11 @@ def filter_temperature_data(temperature_file, dates, output_file):
 
 
 # Directory containing the txt files
-resist_data_dir = "data/tmp/txt_files"
+resist_data_dir = "outputs/tmp/txt_files"
 # Path to the original temperature file
-temperature_file = "data/inputs/raw_temperature_data/GNtemp.txt"
+temperature_file = "inputs/raw_temperature_data/GNtemp.txt"
 # Path to save the filtered temperature data
-output_file = "data/tmp/temperature_data/Newtem.txt"
+output_file = "outputs/tmp/temperature_data/Newtem.txt"
 
 # Extract dates from filenames
 dates = extract_dates_from_filenames(resist_data_dir)
