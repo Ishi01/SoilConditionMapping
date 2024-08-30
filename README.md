@@ -41,7 +41,7 @@ Follow the steps below to set up your environment and get started with the proje
 
 1. Install Imageio
     ```bash
-   pip install imageio
+   pip install pandas
    
 ### Step 4: Run the Python script
 
