@@ -59,7 +59,7 @@ def inversion(start=[0,0], end=[47, -8], quality=33.5, area=0.5, work_dir="/User
         os.makedirs(work_dir, exist_ok=True)
         os.chdir(work_dir)
 
-        """ Load the inputs into the library"""
+        """ Load the inputs into the library""" 
 
         mgr = ert.ERTManager(entries_sel[i], verbose=True, debug=True)  # load the file
 
