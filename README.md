@@ -1,40 +1,44 @@
-# SoilConditionMapping
-CITS5206 Soil Condition Mapping project
+# Data Processing Workflow for tx0_to_txt_temp Pipeline
 
-This branch belongs to Long Qin.
+# 1. Run ```tx0_to_txt_offset.py```
 
-# For window
-## Step open the Anaconda (using Administrator)
+   - **Input**: `tx0_files` folder
+   - **Output**: `output_txt_offset` folder
 
-```bash
-(base) C:\Windows\System32>conda update --all --yes
+```python
+python tx0_to_txt_offset.py tx0_files/ output_txt_offset/
+
 ```
 
-```bash
-(base) C:\Windows\System32>conda install -c gimli pygimli
+# 2. Run ```Newtem.py```
+
+
+   - **Input**: `output_txt_offset` folder and `GNtemp.txt` file
+   - **Output**: `Newtem.txt` 
+
+```python
+python Newtem.py output_txt_offset/ GNtemp.txt
+
 ```
 
 
+# 3. Run ```txt_temp.py```
 
-### The following command will create a brand new, independent Conda environment named pg and install the specified version of the pygimli package within it. This will not affect the base environment or any other existing environments.
-```bash
-(base) C:\Windows\System32>conda create -n pg -c gimli -c conda-forge pygimli=1.4.3
+   - **Input**: `output_txt_offset` folder and `Newtem.txt` file
+   - **Output**: `tx0_to_txt_temp` folder
+
+```python
+python txt_temp.py Newtem.txt output_txt_offset/ 
 ```
 
-```bash
-base) PS C:\Users\qinlo\Desktop\Soil-Conditions-main> conda activate pg
-```
+# 4. Run ```auto_tx0_txt_temp.py``` to automate the above process.
 
-```bash
-# To activate this environment, use
-#
-$ conda activate pg
-#
-# To deactivate an active environment, use
-#
-     $ conda deactivate
-```
+   - **Input**: `tx0_files` folder and  `GNtemp.txt` file
+   - **Output**: `tx0_to_txt_temp` folder
 
+```python
+python auto_tx0_txt_temp.py
+```
 
 
 ρ_corrected = ρ_measured * [1 + α(T - T_ref)]
