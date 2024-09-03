@@ -1,7 +1,8 @@
 import os
+import shutil
+import threading
+import time
 from matplotlib import pyplot as plt
-import numpy as np
-
 import pygimli as pg
 import pygimli.meshtools as mt
 from pygimli.physics import ert
@@ -10,41 +11,44 @@ from pygimli.physics import ert
 processed_data_dir1 = os.path.join(os.path.dirname(__file__), 'outputs/corrected_resistivity_detailed')
 processed_data_dir2 = os.path.join(os.path.dirname(__file__), 'outputs/corrected_resistivity_simplified')
 
+# Threading event
+inversion_done_event = threading.Event()
+
 
 def inversion(
-        processed_data_dir,  # 处理后数据所在目录
+        processed_data_dir,
         start=[0, 0],
         end=[47, -8],
         quality=33.5,
         area=0.5,
         work_dir=None,
-        inversion_params=None  # 用于配置反演参数的字典
+        inversion_params=None
 ):
     """
-    ERT Inversion and Visualisation
+    ERT Inversion and Visualization
     """
     if work_dir is None:
         work_dir = os.getcwd()
 
-    os.makedirs(work_dir, exist_ok=True)
+    # Resistivity img
+    output_dir = os.path.join(work_dir, 'outputs/resis_mapping')
+    os.makedirs(output_dir, exist_ok=True)
 
-    # Set the current working directory
-    os.chdir(processed_data_dir)
+    # tmp mesh
+    tmp_dir = os.path.join(work_dir, 'outputs/tmp')
+    os.makedirs(tmp_dir, exist_ok=True)
 
     # Find all txt files in the folder
-    entries_sel = [file for file in os.listdir() if file.endswith(".txt")]
+    entries_sel = [file for file in os.listdir(processed_data_dir) if file.endswith(".txt")]
 
     # Creating geometrics and meshes
     geom = mt.createWorld(start=start, end=end, worldMarker=False)
     pg.show(geom, boundaryMarker=True)
     mesh = mt.createMesh(geom, quality=quality, area=area, smooth=True)
-    mesh.save("mesh.bms")
 
-    Storage = np.zeros([np.shape(mesh.cellMarkers())[0], np.shape(entries_sel)[0]])
-
-    # Ensure inversion_params ! None
+    # Ensure inversion_params is not None
     if inversion_params is None:
-        inversion_params = {}  # use empty dic
+        inversion_params = {}  # use empty dict
 
     # Inversion
     for i, date in enumerate(entries_sel):
@@ -72,6 +76,11 @@ def inversion(
             **inversion_params  # params provided by UI
         )
 
+        # Save mesh with a unique name in outputs/tmp
+        mesh_filename = f"{date.replace('.txt', '')}.bms"
+        mesh_filepath = os.path.join(tmp_dir, mesh_filename)
+        mesh.save(mesh_filepath)
+
         # Save and display
         fig1, ax1 = plt.subplots(1, figsize=(16.0, 5))
         mgr.showResult(ax=ax1, cMin=50, cMax=1000)
@@ -81,10 +90,54 @@ def inversion(
         ax1.set_title(labels)
         plt.tight_layout()
 
+        # Save figure to outputs/resis_mapping
+        output_image_path = os.path.join(output_dir, f"{date.replace('.txt', '')}_result.png")
+        fig1.savefig(output_image_path)
+
+        plt.close(fig1)
+
     plt.show()
-    return fig1
+
+    # thread event set
+    inversion_done_event.set()
+
+
+def delete_temporary_files(work_dir):
+    """
+    auto delete vector files
+    """
+    # wait for inversion to complete
+    inversion_done_event.wait()
+
+    # Wait for a short period to ensure files are not in use
+    time.sleep(1)
+
+    # delete designated files
+    for folder in os.listdir(work_dir):
+        folder_path = os.path.join(work_dir, folder)
+        # Ensure the folder is not input or output related, and not the main folders
+        if os.path.isdir(folder_path) and folder not in ['outputs', 'inputs', 'lib', '.git']:
+            try:
+                shutil.rmtree(folder_path)
+            except OSError as e:
+                print(f"Error: {folder_path} : {e.strerror}")
+
+    # exit
+    os._exit(0)
 
 
 # Main function
 if __name__ == "__main__":
-    inversion(processed_data_dir2, inversion_params={})
+    work_dir = os.getcwd()
+
+    # 2 thread
+    inversion_thread = threading.Thread(target=inversion, args=(processed_data_dir2,),
+                                        kwargs={'work_dir': work_dir, 'inversion_params': {}})
+    deletion_thread = threading.Thread(target=delete_temporary_files, args=(work_dir,))
+
+    var = deletion_thread.daemon
+
+    inversion_thread.start()
+    deletion_thread.start()
+
+    inversion_thread.join()
