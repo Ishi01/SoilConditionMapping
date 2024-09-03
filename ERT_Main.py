@@ -21,7 +21,7 @@ def inversion(
         inversion_params=None  # 用于配置反演参数的字典
 ):
     """
-    ERT 反演和可视化过程
+    ERT Inversion and Visualisation
     """
     if work_dir is None:
         work_dir = os.getcwd()
@@ -31,10 +31,10 @@ def inversion(
     # Set the current working directory
     os.chdir(processed_data_dir)
 
-    # 查找所有处理后的 .txt 文件
+    # Find all txt files in the folder
     entries_sel = [file for file in os.listdir() if file.endswith(".txt")]
 
-    # 创建几何和网格
+    # Creating geometrics and meshes
     geom = mt.createWorld(start=start, end=end, worldMarker=False)
     pg.show(geom, boundaryMarker=True)
     mesh = mt.createMesh(geom, quality=quality, area=area, smooth=True)
@@ -42,38 +42,37 @@ def inversion(
 
     Storage = np.zeros([np.shape(mesh.cellMarkers())[0], np.shape(entries_sel)[0]])
 
-    # 确保 inversion_params 不是 None
+    # Ensure inversion_params ! None
     if inversion_params is None:
-        inversion_params = {}  # 使用空字典代替
+        inversion_params = {}  # use empty dic
 
-    # 开始反演
+    # Inversion
     for i, date in enumerate(entries_sel):
-        # 设置工作目录
+        # Set working dir
         current_work_dir = os.path.join(work_dir, date)
         os.makedirs(current_work_dir, exist_ok=True)
         os.chdir(current_work_dir)
 
-        # 使用完整路径加载处理后的 .txt 文件
         file_path = os.path.join(processed_data_dir, date)
         mgr = ert.ERTManager(file_path, verbose=True, debug=True)
 
-        # 移除负阻抗值
+        # remove negative rhoa
         mgr.data.remove(mgr.data["rhoa"] < 0)
 
-        # 添加误差估计
+        # adds error estimation
         mgr.data["err"] = ert.estimateError(
             mgr.data, absoluteError=0.001, relativeError=0.03
         )
         mgr.data["k"] = ert.createGeometricFactors(mgr.data, numerical=True)
         ert.show(mgr.data)
 
-        # 使用提供的参数进行反演
+        # use params to do the inversion
         inv = mgr.invert(
             mgr.data,
-            **inversion_params  # 使用UI提供的参数
+            **inversion_params  # params provided by UI
         )
 
-        # 保存并显示结果
+        # Save and display
         fig1, ax1 = plt.subplots(1, figsize=(16.0, 5))
         mgr.showResult(ax=ax1, cMin=50, cMax=1000)
         labels = date
@@ -86,7 +85,6 @@ def inversion(
     return fig1
 
 
-# 主函数
+# Main function
 if __name__ == "__main__":
-    # 使用简化数据目录调用反演函数，传入空字典作为 inversion_params
     inversion(processed_data_dir2, inversion_params={})
