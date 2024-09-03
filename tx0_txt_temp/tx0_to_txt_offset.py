@@ -109,9 +109,11 @@ if __name__ == "__main__":
     current_folder = os.getcwd()
 
     #get the input directory
-    inputpath = filedialog.askdirectory(initialdir=current_folder)
+    input_dialogue_title = "Please select the input folder"
+    inputpath = filedialog.askdirectory(initialdir=current_folder, title=input_dialogue_title)
     #get the input directory
-    outputpath= filedialog.askdirectory(initialdir=current_folder)
+    output_dialogue_title = "Please select the output folder"
+    outputpath= filedialog.askdirectory(initialdir=current_folder, title=output_dialogue_title)
 
     #pass them to the convert function
     tx0_to_txt_offset(inputpath, outputpath)
