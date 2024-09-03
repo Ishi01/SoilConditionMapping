@@ -118,10 +118,3 @@ if __name__ == "__main__":
     #pass them to the convert function
     tx0_to_txt_offset(inputpath, outputpath)
 
-
-
-
-    # Define the input folder as the 'tx0_files' directory at the same level as the current script
-    #input_folder = os.path.join(current_folder, 'tx0_files')
-    #output_folder = os.path.join(current_folder, 'output_txt_offset')
-
