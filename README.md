@@ -41,7 +41,7 @@ Follow the steps below to set up your environment and get started with the proje
 
 1. Install Imageio
     ```bash
-   pip install imageio
+   pip install pandas
    
 ### Step 4: Run the Python script
 
@@ -49,7 +49,7 @@ Follow the steps below to set up your environment and get started with the proje
 
 # Trouble Shooting
 
-### Alternative Flow 1 Set System Environment Variables
+### Alternative Flow 1 Set System Environment Variables (If using Windows)
 If you're using an IDE that does not automatically integrate with Anaconda (such as PyCharm or others), you may need to manually configure your system environment variables:
 1. Open the System Properties:
 - Right-click on This PC or My Computer and select Properties.
@@ -58,10 +58,10 @@ If you're using an IDE that does not automatically integrate with Anaconda (such
 2. Modify the Path variable in the System variables section:
 - Click Edit.
 - Add the following paths to the list if Anaconda is installed under C:\
-- C:\Users\YourUsername\Anaconda3
-- C:\Users\YourUsername\Anaconda3\Scripts
-- C:\Users\YourUsername\Anaconda3\condabin
-- Replace **YourUsername** with your actual Windows username.
+- {Your install location}\Anaconda3
+- {Your install location}\Anaconda3\Scripts
+- {Your install location}\Anaconda3\condabin
+- Replace **Your install location**.
 3. Click OK to close all dialogs.
 
 ### Alternative Flow 2 Configure IDE to Use Anaconda Environment
