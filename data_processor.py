@@ -4,10 +4,6 @@ from lib.Tx0ToTxtPolymorph import NoXZTx0ToTxtConverter, Tx0ToTxtConverter
 from lib.data_filter import extract_dates_from_filenames, filter_temperature_data
 from lib.resistivity_temperature_correction import load_temperature_data, process_files
 
-def ensure_directories_exist(directories):
-    """Ensure that the specified directories exist; if not, create them."""
-    for directory in directories:
-        os.makedirs(directory, exist_ok=True)
 
 def convert_tx0_to_txt(input_folder, output_folder, converter_choice):
     """Convert tx0 files to txt files using the selected converter."""
@@ -25,17 +21,20 @@ def convert_tx0_to_txt(input_folder, output_folder, converter_choice):
             converter.process_file(filename)
     print("Conversion from tx0 to txt completed.")
 
+
 def filter_temperature_data_by_date(txt_data_dir, raw_temp_file, output_temp_file):
     """Filter temperature data based on the dates extracted from txt filenames."""
     dates = extract_dates_from_filenames(txt_data_dir)
     filter_temperature_data(raw_temp_file, dates, output_temp_file)
     print(f"Temperature data filtered and saved to {output_temp_file}")
 
+
 def calibrate_resistivity(input_folder, output_dir_detailed, output_dir_simplified, temperature_file):
     """Calibrate resistivity using the temperature data."""
     temperature_dict = load_temperature_data(temperature_file)
     process_files(input_folder, output_dir_detailed, output_dir_simplified, temperature_dict)
     print("Resistivity calibration completed.")
+
 
 def main():
     current_folder = os.getcwd()
@@ -45,12 +44,6 @@ def main():
     corrected_output_folder_detailed = Path(current_folder, 'outputs/corrected_resistivity_detailed')
     corrected_output_folder_simplified = Path(current_folder, 'outputs/corrected_resistivity_simplified')
     raw_temperature_file = Path(current_folder, 'inputs/raw_temperature_data/GNtemp.txt')
-
-    # Ensure all directories exist
-    ensure_directories_exist([
-        tx0_input_folder, txt_output_folder.parent, filtered_temp_output.parent,
-        corrected_output_folder_detailed, corrected_output_folder_simplified, raw_temperature_file.parent
-    ])
 
     # Step 1: Convert tx0 to txt
     print("Select Converter:")
@@ -65,6 +58,7 @@ def main():
     # Step 3: Calibrate resistivity
     calibrate_resistivity(txt_output_folder, corrected_output_folder_detailed, corrected_output_folder_simplified,
                           filtered_temp_output)
+
 
 if __name__ == "__main__":
     main()
