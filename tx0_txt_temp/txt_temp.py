@@ -4,6 +4,8 @@
 import os
 import pandas as pd
 import numpy as np
+import tkinter as tk
+from tkinter import filedialog
 
 def load_temperature_data(temperature_file):
     # Load temperature data from file
@@ -114,18 +116,33 @@ def process_files(data_dir, output_dir, output_dir2, temperature_dict):
 
 # Main program
 # 主程序
-data_dir = "output_txt_offset"  # Input data directory
-                            # 输入数据目录
-output_dir = "txt_corr_temp_detail"  # Detailed output directory
-                               # 详细输出目录
-output_dir2 = "txt_corr_temp"  # Simplified output directory
-                          # 简化输出目录
-temperature_file = "Newtem.txt"  # Temperature data file
-                                 # 温度数据文件
 
-# Load temperature data
-# 加载温度数据
-temperature_dict = load_temperature_data(temperature_file)
-# Process files
-# 处理文件
-process_files(data_dir, output_dir, output_dir2, temperature_dict)
+if __name__ == "__main__":
+    data_dir = "output_txt_offset"  # Input data directory
+                                    # 输入数据目录
+    #get current directory for starting point of askdirectory function
+    current_dir = os.getcwd()
+   
+    #define title for file dialogue
+    d_out_dir_msg = "Please select the detailed output directory"
+    #get output_dir using a file_dialgue and user selection
+    output_dir = filedialog.askdirectory(initialdir=current_dir, title=d_out_dir_msg)
+    # output_dir = "txt_corr_temp_detail"  # Detailed output directory
+                                # 详细输出目录
+    #define title for simple file dialogue
+    s_out_dir_msg = "Please select the simplified output directory"
+    #get the location of the simplified output-directory
+    output_dir2 = filedialog.askdirectory(initialdir=current_dir, title=s_out_dir_msg)
+    #output_dir2 = "txt_corr_temp"  # Simplified output directory
+                            # 简化输出目录
+
+    #use the temperature file output by the previous file
+    temperature_file = "Newtem.txt"  # Temperature data file
+                                    # 温度数据文件
+
+    # Load temperature data
+    # 加载温度数据
+    temperature_dict = load_temperature_data(temperature_file)
+    # Process files
+    # 处理文件
+    process_files(data_dir, output_dir, output_dir2, temperature_dict)
