@@ -26,7 +26,7 @@ def filter_temperature_data(temperature_file, dates, output_file):
 
 
 
-if __name__ == "__main__":
+def main():
     # Directory containing the txt files
     data_dir = "output_intermedia"
 

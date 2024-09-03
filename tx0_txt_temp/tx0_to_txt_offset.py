@@ -103,7 +103,7 @@ def tx0_to_txt_offset(input_folder, output_folder):
     print("All files processed successfully.")
 
 
-if __name__ == "__main__":
+def main():
     #Select input folder using file dialog
     # Get the current working directory
     current_folder = os.getcwd()
@@ -111,9 +111,8 @@ if __name__ == "__main__":
     #get the input directory
     input_dialogue_title = "Please select the input folder"
     inputpath = filedialog.askdirectory(initialdir=current_folder, title=input_dialogue_title)
-    #get the input directory
-    output_dialogue_title = "Please select the output folder"
-    outputpath= filedialog.askdirectory(initialdir=current_folder, title=output_dialogue_title)
+    #list the output directory path
+    outputpath = os.path.join(current_folder, "output_txt_offset")
 
     #pass them to the convert function
     tx0_to_txt_offset(inputpath, outputpath)

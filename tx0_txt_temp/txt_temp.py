@@ -117,7 +117,7 @@ def process_files(data_dir, output_dir, output_dir2, temperature_dict):
 # Main program
 # 主程序
 
-if __name__ == "__main__":
+def main():
     data_dir = "output_txt_offset"  # Input data directory
                                     # 输入数据目录
     #get current directory for starting point of askdirectory function
