@@ -9,37 +9,63 @@ from pygimli.physics import ert
 
 # %%
 
+
 # set up the default value for the function
-def inversion(start=[0,0], end=[47, -8], quality=33.5, area=0.5, work_dir="/Users/hayeenxue/SoilConditionMapping/"):
+def inversion(
+    start=[0, 0],
+    end=[47, -8],
+    quality=33.5,
+    area=0.5,
+    work_dir="D:/Python/SoilConditionMapping/03bertTC",
+):
     "ERT Inversion and Visualization process"
 
-    folder = r"..\..\ERT_Project\Raw"  # Update this to reflect the folder lcoation
-    os.chdir(folder)
+    # Print the current working directory
+    print("Current Working Directory:", os.getcwd())
+
+    # Define the folder path
+    folder = work_dir
+    print("Expected directory:", folder)
+
+    # Check if the folder exists
+    if os.path.isdir(folder):
+        print("Directory exists:", folder)
+    else:
+        print("Directory not found:", folder)
 
     """ Begin Workflow """
+
+    """ 
+    `entries_sel` is reading the orginal `.tx0` files
+    but now need to read the integrated file (including the `txt` and temprature data)
+    Then it will be have the index inbound error in line 181 => `data=SWC[:, 1],`
+    So need to figure out which data should be used to plot the model (2 figures) in the end
+    """
+    
+
+
 
     # Iterate directory
     entries_sel = []
 
     for file in os.listdir():
         # check only text files
-        if file.endswith(".tx0"):
+        if file.endswith(".txt"):
             entries_sel.append(file)
 
+    print("files:", os.listdir())
+    print("entries_sel:", entries_sel)
 
     """ Create Geometry and Mesh -  This is the preferred way (but we'll talk about it next time """
 
-    geom = mt.createWorld(
-        start=start, end=end, worldMarker=False
-    ) 
+    geom = mt.createWorld(start=start, end=end, worldMarker=False)
     pg.show(geom, boundaryMarker=True)
-    mesh = mt.createMesh(
-        geom, quality=quality, area=area, smooth=True
-    ) 
+    mesh = mt.createMesh(geom, quality=quality, area=area, smooth=True)
     mesh.save("mesh.bms")
 
-
     Storage = np.zeros([np.shape(mesh.cellMarkers())[0], np.shape(entries_sel)[0]])
+
+    print("Storage shape:", Storage.shape)
 
     """ Begin Inversion """
 
@@ -59,7 +85,7 @@ def inversion(start=[0,0], end=[47, -8], quality=33.5, area=0.5, work_dir="/User
         os.makedirs(work_dir, exist_ok=True)
         os.chdir(work_dir)
 
-        """ Load the inputs into the library""" 
+        """ Load the inputs into the library"""
 
         mgr = ert.ERTManager(entries_sel[i], verbose=True, debug=True)  # load the file
 
@@ -68,7 +94,9 @@ def inversion(start=[0,0], end=[47, -8], quality=33.5, area=0.5, work_dir="/User
         rhoa = np.array(mgr.data["rhoa"])  # convert resistivity data in numpy vector
         Argw = np.argwhere(rhoa <= 0)  # index of negative resistance
         pg.info("Filtered rhoa (min/max)", min(mgr.data["rhoa"]), max(mgr.data["rhoa"]))
-        Accur = (1 - np.shape(Argw)[0] / np.shape(rhoa)[0]) * 100  # Percentage of Accuracy
+        Accur = (
+            1 - np.shape(Argw)[0] / np.shape(rhoa)[0]
+        ) * 100  # Percentage of Accuracy
         # as (1 - negative values/total values) * 100 # Accur is something I'd like to be printed as information
 
         """ Remove negative value 2 methods - Use first """
@@ -132,7 +160,6 @@ def inversion(start=[0,0], end=[47, -8], quality=33.5, area=0.5, work_dir="/User
         ax1.set_title(labels)
         plt.tight_layout()
 
-
     ##%%
 
     """Converting resistivity to soil water content and visualize"""
@@ -140,8 +167,11 @@ def inversion(start=[0,0], end=[47, -8], quality=33.5, area=0.5, work_dir="/User
     fSWC = lambda x: 246.47 * x ** (-0.627)
     fSWC_2 = lambda x: 211 * x ** (-0.59)
 
-
     SWC = fSWC(Storage)
+
+    print("x shape:", Storage.shape)
+    print("fSWC shape:", SWC.shape)
+    print("SWC shape:", SWC.shape)
 
     fig1, (ax1) = plt.subplots(
         1, sharex=(True), figsize=(15.5, 7), gridspec_kw={"height_ratios": [2]}
@@ -165,10 +195,3 @@ def inversion(start=[0,0], end=[47, -8], quality=33.5, area=0.5, work_dir="/User
     plt.show()
 
     return fig1
-  
-  
-  """
-  need to fix:
-  ensuring the input parameters are provided from UI
-  ensuring the output is returned to UI
-  """
