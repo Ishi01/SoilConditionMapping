@@ -60,5 +60,3 @@ def main():
                           filtered_temp_output)
 
 
-if __name__ == "__main__":
-    main()
