@@ -45,6 +45,7 @@ def inversion(
     geom = mt.createWorld(start=start, end=end, worldMarker=False)
     pg.show(geom, boundaryMarker=True)
     mesh = mt.createMesh(geom, quality=quality, area=area, smooth=True)
+    pg.show(mesh)
 
     # Ensure inversion_params is not None
     if inversion_params is None:

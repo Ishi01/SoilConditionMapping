@@ -25,15 +25,3 @@ def filter_temperature_data(temperature_file, dates, output_file):
     filtered_df.to_csv(output_file, sep="\t", index=False)
 
 
-# Directory containing the txt files
-resist_data_dir = "outputs/tmp/txt_files"
-# Path to the original temperature file
-temperature_file = "inputs/raw_temperature_data/GNtemp.txt"
-# Path to save the filtered temperature data
-output_file = "outputs/tmp/temperature_data/Newtem.txt"
-
-# Extract dates from filenames
-dates = extract_dates_from_filenames(resist_data_dir)
-
-# Filter temperature data and save it to a new file
-filter_temperature_data(temperature_file, dates, output_file)

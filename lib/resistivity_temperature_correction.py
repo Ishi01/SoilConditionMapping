@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import numpy as np
-from pathlib import Path
 
 
 def load_temperature_data(temperature_file):
@@ -102,11 +101,3 @@ def process_files(data_dir, output_dir, output_dir2, temperature_dict):
                 print(f"Error loading {file_name}: {e}")
 
 
-# Main program
-resist_data_dir = Path("outputs/tmp/txt_files")
-output_dir = Path("outputs/corrected_resistivity_detailed")
-output_dir2 = Path("outputs/corrected_resistivity_simplified")
-temperature_file = Path("outputs/tmp/temperature_data/Newtem.txt")
-
-temperature_dict = load_temperature_data(temperature_file)
-process_files(resist_data_dir, output_dir, output_dir2, temperature_dict)
