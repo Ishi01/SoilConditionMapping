@@ -60,15 +60,18 @@ class Tx0ToTxtConverter:
 
     def correct_offsets(self, measurement_data):
         """Corrects the offset of electrode indices to start from 1 based on actual data."""
+        corrected_data = []  # Initialize the corrected_data list
+
         if measurement_data:
             first_a = min(data[0] for data in measurement_data)
             offset = first_a - 1  # Calculate offset to normalize to 1
 
-            corrected_data = []
             for data in measurement_data:
                 a, b, m, n = data[:4]
-                corrected_data.append(self.format_corrected_data(a - offset, b - offset, m - offset, n - offset, data[4:]))
-        return corrected_data
+                corrected_data.append(
+                    self.format_corrected_data(a - offset, b - offset, m - offset, n - offset, data[4:]))
+
+        return corrected_data  # Return the initialized list
 
     def format_measurement_data(self, a, b, m, n, rho, parts):
         """Formats the measurement data for writing, including x and z coordinates."""
