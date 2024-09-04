@@ -6,6 +6,8 @@ from matplotlib import pyplot as plt
 import pygimli as pg
 import pygimli.meshtools as mt
 from pygimli.physics import ert
+import tkinter as tk
+from tkinter import filedialog
 
 # Define paths to the processed data directories
 processed_data_dir1 = os.path.join(os.path.dirname(__file__), 'outputs/corrected_resistivity_detailed')
@@ -14,6 +16,15 @@ processed_data_dir2 = os.path.join(os.path.dirname(__file__), 'outputs/corrected
 # Threading event
 inversion_done_event = threading.Event()
 
+def select_directory():
+    """
+    Function to open a file dialog to select a directory.
+    """
+    root = tk.Tk()
+    root.withdraw()  # Hide the root window
+    selected_dir = filedialog.askdirectory(title="Select Processed Data Directory")
+    root.destroy()
+    return selected_dir
 
 def inversion(
         processed_data_dir,
@@ -130,6 +141,13 @@ def delete_temporary_files(work_dir):
 # Main function
 if __name__ == "__main__":
     work_dir = os.getcwd()
+
+    processed_data_dir2 = select_directory()
+
+    # Check if a directory was selected
+    if not processed_data_dir2:
+        print("No directory selected, exiting.")
+        exit()
 
     # 2 thread
     inversion_thread = threading.Thread(target=inversion, args=(processed_data_dir2,),
