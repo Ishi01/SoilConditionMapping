@@ -110,13 +110,19 @@ def start_data_processing(ui):
         print("Please use the 'Browser' button to select the temperature file first.")
         return
 
-    # Set output directories
+    # Select Output Directory
+    output_directory = QFileDialog.getExistingDirectory(None, "Select Output Directory", "")
+    if not output_directory:  # use default if cancelled
+        output_directory = os.path.join(os.getcwd(), 'outputs')
+
+    corrected_output_folder_detailed = Path(output_directory, 'corrected_resistivity_detailed')
+    corrected_output_folder_simplified = Path(output_directory, 'corrected_resistivity_simplified')
+    corrected_output_folder_detailed.mkdir(parents=True, exist_ok=True)
+    corrected_output_folder_simplified.mkdir(parents=True, exist_ok=True)
+
+    # Set output directories for temporary files
     txt_output_folder = Path(tempfile.mkdtemp())
     filtered_temp_output = Path(tempfile.mkdtemp(), 'Newtem.txt')
-    corrected_output_folder_detailed = Path(os.getcwd(),
-                                            'outputs/corrected_resistivity_detailed')  # Save in project folder
-    corrected_output_folder_simplified = Path(os.getcwd(),
-                                              'outputs/corrected_resistivity_simplified')  # Save in project folder
 
     # Step 1: Convert tx0 to txt
     convert_tx0_to_txt(global_tx0_input_folder, txt_output_folder, converter_choice)
@@ -132,8 +138,6 @@ def start_data_processing(ui):
     print("Resistivity calibration completed.")
 
     print("Data processing completed.")
-
-
 
 
 def exit_application(MainWindow):
