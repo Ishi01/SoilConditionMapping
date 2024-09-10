@@ -46,6 +46,17 @@ def get_first_raw_file():
     return os.path.join(raw_folder, sorted(files)[0])
 
 
+def create_mesh(start=[0, 0],
+    end=[47, -8],
+    quality=33.5,
+    area=0.5):
+     # Create Geometry and Mesh
+    geom = mt.createWorld(start=start, end=end, worldMarker=False)
+    mesh = mt.createMesh(geom, quality=quality, area=area, smooth=True)
+    mesh.save("mesh.bms")
+    
+
+
 def startInversion(
     maxIter=6,
     lam=7,
@@ -65,10 +76,7 @@ def startInversion(
         pg.error(str(e))
         return
 
-    # Create Geometry and Mesh
-    geom = mt.createWorld(start=start, end=end, worldMarker=False)
-    mesh = mt.createMesh(geom, quality=quality, area=area, smooth=True)
-    mesh.save("mesh.bms")
+    create_mesh(start, end, quality, area)
 
     # Inversion preparing
     date = os.path.basename(file_to_convert)  # Extract the file name from the path
