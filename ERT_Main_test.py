@@ -1,49 +1,63 @@
-import pytest
 import os
-import numpy as np
-import pygimli as pg
-import pygimli.meshtools as mt
+import unittest
+import shutil
+from your_module_name import ensure_output_folder, cleanup_temp_files, startInversion
 
-# Import the inversion function
-from ERT_Main import inversion
+class TestSoilConditionMapping(unittest.TestCase):
 
-@pytest.fixture
-def setup_test_environment(tmp_path):
-    # Create a temporary directory for the test
-    test_dir = tmp_path / "test_inversion"
-    test_dir.mkdir()
+    def setUp(self):
+        # Set up any necessary environment before each test
+        self.output_dir = ensure_output_folder()
+        self.raw_file = "test_data.dat"  # replace with the actual test file name
+        self.raw_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Raw")
+        
+        # Ensure Raw directory and test file exist
+        if not os.path.exists(self.raw_dir):
+            os.makedirs(self.raw_dir)
+        
+        with open(os.path.join(self.raw_dir, self.raw_file), 'w') as f:
+            f.write("Some test content")  # Put valid content for testing
 
-    # Create a dummy tx0 file
-    dummy_file = test_dir / "dummy.tx0"
-    dummy_file.write_text("Dummy content")
+    def test_ensure_output_folder(self):
+        # Test if the output directory is created correctly
+        self.assertTrue(os.path.exists(self.output_dir))
 
-    # Change to the temporary directory
-    os.chdir(test_dir)
+    def test_cleanup_temp_files(self):
+        # Create temporary files to be cleaned up
+        patterns = [
+            "*.vector", "*.matrix", "*.bmat", 
+            "fop-model1.vtk", "invalid.data", "mesh.bms"
+        ]
+        
+        for pattern in patterns:
+            with open(pattern, 'w') as f:
+                f.write("temp data")
+        
+        # Run the cleanup function
+        cleanup_temp_files()
+        
+        # Verify the files were removed
+        for pattern in patterns:
+            self.assertFalse(os.path.exists(pattern))
 
-    return test_dir
+    def test_start_inversion(self):
+        # This test runs the full inversion process using the actual test file.
+        try:
+            startInversion()
+            output_files = os.listdir(self.output_dir)
+            
+            # Check if the expected output file is generated
+            self.assertTrue(any(f.endswith('.png') for f in output_files))
+        except Exception as e:
+            self.fail(f"startInversion failed with exception: {e}")
 
-def test_inversion_function(setup_test_environment):
-    # Set up test environment
-    # test_dir = setup_test_environment
+    def tearDown(self):
+        # Clean up after each test
+        if os.path.exists(self.output_dir):
+            shutil.rmtree(self.output_dir)
+        
+        if os.path.exists(self.raw_dir):
+            shutil.rmtree(self.raw_dir)
 
-    # Run the inversion function
-    # result = inversion(
-    #     start=[0, 0],
-    #     end=[47, -8],
-    #     quality=33.5,
-    #     area=0.5,
-    #     work_dir=str(test_dir)
-    # )
-    result = inversion()
-
-    # Assert that the result is not None
-    assert result is not None
-
-    # # Check if the mesh file was created
-    # mesh_file = test_dir / "mesh.bms"
-    # assert mesh_file.exists()
-
-    # Additional checks can be added based on the expected behavior of the function
-
-if __name__ == "__main__":
-    pytest.main()
+if __name__ == '__main__':
+    unittest.main()
