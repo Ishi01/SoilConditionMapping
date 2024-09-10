@@ -121,12 +121,32 @@ def load_temperature_data(temperature_file):
     # 提取日期
     temperature_data['date'] = temperature_data['time'].dt.date
     temperature_dict = {}
+
+    #Fram what I can tell, while the below code does group by data, it doesn't store the correct date in the dictionary
+    #For the purposes of this UI, since the temperature readings are taken over a single day, I will convert this average into:
+    #a single dictionary with a date object and 5 temperatures for that date, this is a prototype so it will be changeable
+
     # Group by date and store in dictionary
     # 按日期分组并存储在字典中
     for date, group in temperature_data.groupby('date'):
         temperature_dict[date] = group
-    print(f"Loaded temperature data for {len(temperature_dict)} days.")
-    return temperature_dict
+
+    #This code is moved from the read in temps function
+    temp_data = temperature_dict[date]
+    temperatures = temp_data.iloc[0, 1:7].values.astype(float)
+    print(f"Temperatures for {date}: {temperatures}")
+    print(temperatures)
+
+    #Create dictionary return type
+    temp_date_dict = {
+        "date": date,
+        "temperatures": temperatures
+    }
+    
+    print(temp_date_dict)
+    #print(f"Loaded temperature data for {len(temperature_dict)} days.")
+    
+    return temp_date_dict
 
 def interpolate_temperature(z, depths, temperatures):
     # Interpolate temperature for a given depth
@@ -137,6 +157,7 @@ def interpolate_temperature(z, depths, temperatures):
     elif z > max(depths):
         return temperatures[-1]  # If depth is greater than maximum, return deepest temperature
                                  # 如果深度大于最大深度,返回最深处温度
+        
     return np.interp(z, depths, temperatures)  # Linear interpolation
                                                # 线性插值
 
@@ -148,7 +169,7 @@ def apply_calibration(resistivity, temperature):
     return resistivity * (1 + 0.025 * (temperature - 25))  # Calibration formula
                                                           # 校正公式
 
-def process_files(data_dir, output_dir, output_dir2, temperature_dict):
+def process_files(data_dir, output_dir, output_dir2, temp_date_dict):
     # Ensure output directories exist
     # 确保输出目录存在
     if not os.path.exists(output_dir):
@@ -174,6 +195,7 @@ def process_files(data_dir, output_dir, output_dir2, temperature_dict):
 
             # Read data section
             # 读取数据部分
+            #NOTE, The skiprows needs to be converted to a dynamically generated value
             data = pd.read_csv(file_path, skiprows=52, delim_whitespace=True, 
                                names=['a', 'b', 'm', 'n', 'resistivity', 'x', 'z'])
             data['z'] = pd.to_numeric(data['z'], errors='coerce')
@@ -185,39 +207,37 @@ def process_files(data_dir, output_dir, output_dir2, temperature_dict):
             date = pd.to_datetime(date_str).date()
             print(f"Extracted date: {date}")
 
-            if date in temperature_dict:
-                temp_data = temperature_dict[date]
-                temperatures = temp_data.iloc[0, 1:7].values.astype(float)
-                print(f"Temperatures for {date}: {temperatures}")
-                
-                # Interpolate temperatures and correct resistivity
-                # 插值温度并校正电阻率
-                data['interpolated_temperature'] = data['z'].apply(lambda z: interpolate_temperature(z, depths, temperatures))
-                data['corrected_resistivity'] = data.apply(lambda row: apply_calibration(row['resistivity'], row['interpolated_temperature']), axis=1)
-                
-                # Save detailed output
-                # 保存详细输出
-                output_file_path = os.path.join(output_dir, file_name)
-                output_file_path2 = os.path.join(output_dir2, file_name)
+            #removed if statement to check for date in temperatures, not necessary with new process
+            temperatures = temp_date_dict["temperatures"]
+            
+            # Interpolate temperatures and correct resistivity
+            # 插值温度并校正电阻率
+            data['interpolated_temperature'] = data['z'].apply(lambda z: interpolate_temperature(z, depths, temperatures))
+            data['corrected_resistivity'] = data.apply(lambda row: apply_calibration(row['resistivity'], row['interpolated_temperature']), axis=1)
+            
+            # Save detailed output
+            # 保存详细输出
+            output_file_path = os.path.join(output_dir, file_name)
+            output_file_path2 = os.path.join(output_dir2, file_name)
 
-                with open(output_file_path, 'w') as f:
-                    f.writelines(header_lines)
-                    f.write("# a    b    m    n    resistivity    x    z    interpolated_temperature    corrected_resistivity\n")
-                    data.to_csv(f, sep='\t', index=False, header=False, float_format='%g')  # Keep integers as integers
-                                                                                            # 保持整数格式
+            with open(output_file_path, 'w') as f:
+                f.writelines(header_lines)
+                f.write("# a    b    m    n    resistivity    x    z    interpolated_temperature    corrected_resistivity\n")
+                data.to_csv(f, sep='\t', index=False, header=False, float_format='%g')  # Keep integers as integers
+                                                                                        # 保持整数格式
 
-                # Save simplified output
-                # 保存简化输出
-                with open(output_file_path2, 'w') as f:
-                    f.writelines(header_lines)
-                    f.write("# a    b    m    n    rhoa\n")
-                    for _, row in data.iterrows():
-                        f.write(f"{int(row['a']):>6}\t{int(row['b']):>6}\t{int(row['m']):>6}\t{int(row['n']):>6}\t{row['corrected_resistivity']:>15.2f}\n")
+            # Save simplified output
+            # 保存简化输出
+            with open(output_file_path2, 'w') as f:
+                f.writelines(header_lines)
+                f.write("# a    b    m    n    rhoa\n")
+                for _, row in data.iterrows():
+                    f.write(f"{int(row['a']):>6}\t{int(row['b']):>6}\t{int(row['m']):>6}\t{int(row['n']):>6}\t{row['corrected_resistivity']:>15.2f}\n")
 
-                print(f"Processed and saved: {output_file_path}")
-                print(f"Processed and saved: {output_file_path2}")
-            else:
-                print(f"No temperature data available for the date in {file_name}")
+            print(f"Processed and saved: {output_file_path}")
+            print(f"Processed and saved: {output_file_path2}")
+        else:
+            print(f"No temperature data available for the date in {file_name}")
 
 # Main program
 # 主程序
@@ -244,16 +264,15 @@ def main():
     
     #define title for file dialogue
     d_out_dir_msg = "Please select the detailed output directory"
+
     #get output_dir using a file_dialgue and user selection
     output_dir = filedialog.askdirectory(initialdir=current_dir, title=d_out_dir_msg)
-    # output_dir = "txt_corr_temp_detail"  # Detailed output directory
-                                # 详细输出目录
+
     #define title for simple file dialogue
     s_out_dir_msg = "Please select the simplified output directory"
+
     #get the location of the simplified output-directory
     output_dir2 = filedialog.askdirectory(initialdir=current_dir, title=s_out_dir_msg)
-    #output_dir2 = "txt_corr_temp"  # Simplified output directory
-                            # 简化输出目录
 
     #use the temperature file output by the previous file
     temperature_file = "GeneratedTemp.txt"  # Temperature data file
@@ -261,19 +280,22 @@ def main():
 
     # Load temperature data
     # 加载温度数据
-    temperature_dict = load_temperature_data(temperature_file)
+    temp_date_dict = load_temperature_data(temperature_file)
     # Process files
     # 处理文件
-    process_files(data_dir, output_dir, output_dir2, temperature_dict)
+    process_files(data_dir, output_dir, output_dir2, temp_date_dict)
 
     #clean up data used mid-processing
-    print(f"deleting generated data files")
-    shutil.rmtree('output_txt_offset')
-    print(f"deleting generated temperature file")
-    os.remove("GeneratedTemp.txt")
+    #print(f"deleting generated data files")
+    #shutil.rmtree('output_txt_offset')
+    #print(f"deleting generated temperature file")
+    #os.remove("GeneratedTemp.txt")
 
 
 #compiled dataprep script no longer necessary, just run the file and everything should run on its own
 if __name__ == "__main__":
     main()
     print(f"All processes run successfully")
+
+
+
