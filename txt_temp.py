@@ -2,6 +2,7 @@
  #   New name  is txt_temp.py
 
 import os
+import shutil
 import pandas as pd
 import numpy as np
 import tkinter as tk
@@ -260,3 +261,6 @@ def main():
     # Process files
     # 处理文件
     process_files(data_dir, output_dir, output_dir2, temperature_dict)
+
+    #clean up data used mid-processing
+    shutil.rmtree('output_txt_offset')
