@@ -54,7 +54,7 @@ def create_mesh(start=[0, 0],
     geom = mt.createWorld(start=start, end=end, worldMarker=False)
     mesh = mt.createMesh(geom, quality=quality, area=area, smooth=True)
     mesh.save("mesh.bms")
-    
+    return mesh
 
 
 def startInversion(
@@ -76,7 +76,7 @@ def startInversion(
         pg.error(str(e))
         return
 
-    create_mesh(start, end, quality, area)
+    mesh = create_mesh(start, end, quality, area)
 
     # Inversion preparing
     date = os.path.basename(file_to_convert)  # Extract the file name from the path
