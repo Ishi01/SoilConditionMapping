@@ -138,6 +138,7 @@ def load_temperature_data(temperature_file):
     print(temperatures)
 
     #Create dictionary return type
+    date.strftime("%Y/%m/%d")
     temp_date_dict = {
         "date": date,
         "temperatures": temperatures
@@ -168,6 +169,36 @@ def apply_calibration(resistivity, temperature):
         return None
     return resistivity * (1 + 0.025 * (temperature - 25))  # Calibration formula
                                                           # 校正公式
+
+#FOR PETER, this function is unnecessary, its just for me to get values in while prototyping
+#once you add this to the UI, just call manual temp and pass the values as demonstrated
+def manual_temp_console_input():
+    #ask for date
+    date = input("Please enter the date in the form: YYYY/MM/DD: ")
+    temp4 = float(input("Enter the temperature at -4 meters: "))
+    temp35 = float(input("Enter the temperature at -3.5 meters: "))
+    temp3 = float(input("Enter the temperature at -3 meters: "))
+    temp15 = float(input("Enter the temperature at -1.5 meters: "))
+    temp1 = float(input("Enter the temperature at -1 meters: "))
+    temp05 = float(input("Enter the temperature at -0.5 meters: "))
+
+    temp_date_dict = manual_temp(date, temp4, temp35, temp3, temp15, temp1, temp05)
+    return temp_date_dict
+
+    #I'm going to have to add input validity checks to this later once I get the prototype working
+
+def manual_temp(date, temp4, temp35, temp3, temp15, temp1, temp05):
+    #add user input validity checks later :)
+
+    temperatures = [temp4, temp35, temp3, temp15, temp1, temp05]
+    print(temperatures)
+
+    temp_date_dict = {
+        "date": date,
+        "temperatures": temperatures
+    }
+    
+    return temp_date_dict
 
 def process_files(data_dir, output_dir, output_dir2, temp_date_dict):
     # Ensure output directories exist
@@ -209,6 +240,7 @@ def process_files(data_dir, output_dir, output_dir2, temp_date_dict):
 
             #removed if statement to check for date in temperatures, not necessary with new process
             temperatures = temp_date_dict["temperatures"]
+            print(temperatures)
             
             # Interpolate temperatures and correct resistivity
             # 插值温度并校正电阻率
@@ -259,9 +291,24 @@ def main():
     data_dir = "output_txt_offset"  # Input data directory
                                     # 输入数据目录
 
-    #Run Newtem, to process the temperature data and create mid process processing folder
-    Newtem.main()
+    #Ask user how they would like to input temperature
+    user_choice = input("Would you like to enter temp data maually (1) or use a file (2)")
     
+    if (user_choice == "1"):
+        temp_date_dict = manual_temp_console_input()
+    elif (user_choice == "2"):
+        #Run Newtem, to process the temperature data and create mid process processing folder
+        Newtem.main()
+        #use the temperature file output by the Newtem file
+        temperature_file = "GeneratedTemp.txt"  # Temperature data file
+                                        # 温度数据文件
+        # Load temperature data
+        # 加载温度数据
+        temp_date_dict = load_temperature_data(temperature_file)
+    
+    else:
+        print("invalid value select")
+        exit()
     #define title for file dialogue
     d_out_dir_msg = "Please select the detailed output directory"
 
@@ -274,13 +321,7 @@ def main():
     #get the location of the simplified output-directory
     output_dir2 = filedialog.askdirectory(initialdir=current_dir, title=s_out_dir_msg)
 
-    #use the temperature file output by the previous file
-    temperature_file = "GeneratedTemp.txt"  # Temperature data file
-                                    # 温度数据文件
 
-    # Load temperature data
-    # 加载温度数据
-    temp_date_dict = load_temperature_data(temperature_file)
     # Process files
     # 处理文件
     process_files(data_dir, output_dir, output_dir2, temp_date_dict)
