@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import tkinter as tk
 from tkinter import filedialog
+import Newtem
 
 
 def tx0_to_txt_offset(input_folder, output_folder):
@@ -237,7 +238,10 @@ def main():
 
     data_dir = "output_txt_offset"  # Input data directory
                                     # 输入数据目录
-   
+
+    #Run Newtem, to process the temperature data and create mid process processing folder
+    Newtem.main()
+    
     #define title for file dialogue
     d_out_dir_msg = "Please select the detailed output directory"
     #get output_dir using a file_dialgue and user selection
@@ -252,7 +256,7 @@ def main():
                             # 简化输出目录
 
     #use the temperature file output by the previous file
-    temperature_file = "Newtem.txt"  # Temperature data file
+    temperature_file = "GeneratedTemp.txt"  # Temperature data file
                                     # 温度数据文件
 
     # Load temperature data
@@ -263,5 +267,13 @@ def main():
     process_files(data_dir, output_dir, output_dir2, temperature_dict)
 
     #clean up data used mid-processing
-    print(f"deleting root file")
+    print(f"deleting generated data files")
     shutil.rmtree('output_txt_offset')
+    print(f"deleting generated temperature file")
+    os.remove("GeneratedTemp.txt")
+
+
+#compiled dataprep script no longer necessary, just run the file and everything should run on its own
+if __name__ == "__main__":
+    main()
+    print(f"All processes run successfully")

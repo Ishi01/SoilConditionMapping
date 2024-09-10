@@ -39,7 +39,7 @@ def main():
     temperature_file = filedialog.askopenfilename(initialdir=current_folder, title=temp_msg)
     
     # Path to save the filtered temperature data
-    output_file = "Newtem.txt"
+    output_file = "GeneratedTemp.txt"
 
     # Extract dates from filenames
     dates = extract_dates_from_filenames(data_dir)
