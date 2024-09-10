@@ -126,8 +126,8 @@ def startInversion(
     plt.savefig(fig_filename, dpi=300, bbox_inches="tight")
     print(f"Figure saved as: {fig_filename}")
 
-    plt.close(fig1)  # Close the figure to free up memory
-
+    plt.close(fig1)  
+    plt.close("all")  
 
 if __name__ == "__main__":
     startInversion()
