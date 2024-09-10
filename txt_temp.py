@@ -263,4 +263,5 @@ def main():
     process_files(data_dir, output_dir, output_dir2, temperature_dict)
 
     #clean up data used mid-processing
+    print(f"deleting root file")
     shutil.rmtree('output_txt_offset')
