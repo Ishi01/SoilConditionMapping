@@ -65,6 +65,7 @@ def startInversion(
     end=[47, -8],
     quality=33.5,
     area=0.5,
+    zWeight=0.7,
 ):
 
     output_dir = ensure_output_folder()
@@ -102,7 +103,7 @@ def startInversion(
     # Chi-squared represents the goodness of fit between the model and the observed data.
     for iteration in range(maxIter):
         inv = mgr.invert(
-            mesh=mesh, lam=lam, maxIter=1, dPhi=dPhi, CHI1OPT=5, Verbose=True
+            mesh=mesh, zWeight=zWeight,lam=lam, maxIter=1, dPhi=dPhi, CHI1OPT=5, Verbose=True
         )
 
         if hasattr(inv, "chi2"):
