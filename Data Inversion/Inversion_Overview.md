@@ -66,11 +66,13 @@ graph TD
 #### Output Folder:
 
 The script saves output plots in the `Output` directory. Each plot file is named according to the data file's name with an additional `inversion_result_` prefix.
+
 ![alt text](Output.png)
 
 #### Plotting:
 
 After inversion, a plot of the result is generated using Matplotlib. The plot shows the resistivity data and is saved as a `.PNG` file.
+
 ![alt text](inversion_result_.png)
 
 # Conclusion
