@@ -232,3 +232,24 @@ def open_directory(directory):
             subprocess.Popen(["xdg-open", directory])
     else:
         print("Directory path is empty. Please select a valid directory.")
+
+
+def save_output_file(ui):
+    """
+    Opens a file dialog to allow the user to save the output to a location on their computer.
+
+    Parameters:
+        ui: Instance of Ui_MainWindow.
+    """
+    # Open a file dialog to select the location and filename to save the output
+    options = QFileDialog.Options()
+    file_name, _ = QFileDialog.getSaveFileName(None, "Save Output File", "", "Text Files (*.txt);;All Files (*)", options=options)
+
+    if file_name:
+        # Define what to save in the output file
+        output_content = get_output_content(ui)  # Define the method to get the content to be saved
+
+        # Write the output content to the selected file
+        with open(file_name, 'w') as file:
+            file.write(output_content)
+        print(f"Output saved to {file_name}")
