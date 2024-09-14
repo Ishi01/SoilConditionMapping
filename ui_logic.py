@@ -30,6 +30,9 @@ def setup_ui_logic(ui, MainWindow):
     # Set up the "Start" button click event (for data processing)
     ui.pushButtonStartDataProcessing.clicked.connect(lambda: start_data_processing_thread(ui))
 
+    # Set up "OK" button to capture inversion parameters and start inversion
+    ui.buttonBoxResetConfirmSave.accepted.connect(lambda: start_inversion_with_parameters(ui))
+
     # Set up the "Exit" menu exit event
     ui.actionExit.triggered.connect(lambda: exit_application(MainWindow))
 
