@@ -27,6 +27,17 @@ def cleanup_temp_files():
                 print(f"Removed: {file}")
             except Exception as e:
                 print(f"Error removing {file}: {e}")
+                
+# Create mesh               
+def create_mesh(start=[0, 0],
+    end=[47, -8],
+    quality=33.5,
+    area=0.5,):
+     # Create Geometry and Mesh
+    geom = mt.createWorld(start=start, end=end, worldMarker=False)
+    mesh = mt.createMesh(geom, quality=quality, area=area, smooth=True)
+    mesh.save("mesh.bms")
+    return mesh
 
 # Compute water content
 def watercomputing(start=[0, 0], end=[47, -8], quality=33.5, area=0.5,
@@ -38,9 +49,7 @@ def watercomputing(start=[0, 0], end=[47, -8], quality=33.5, area=0.5,
     raw_data_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Raw")
     entries_sel = [file for file in os.listdir(raw_data_folder) if file.endswith(".txt")]
 
-    geom = mt.createWorld(start, end, worldMarker=False)
-    mesh = mt.createMesh(geom, quality, area, smooth=True)
-    mesh.save("mesh.bms")
+    mesh = create_mesh(start=start, end=end, quality=quality, area=area)
 
     centers = mesh.cellCenters()
     x_coordinates = centers[:, 0]
