@@ -40,7 +40,7 @@ def watercomputing(start=[0, 0], end=[47, -8], quality=33.5, area=0.5,
 
     geom = mt.createWorld(start, end, worldMarker=False)
     mesh = mt.createMesh(geom, quality, area, smooth=True)
-    mesh.save(os.path.join(output_folder, "mesh.bms"))
+    mesh.save("mesh.bms")
 
     centers = mesh.cellCenters()
     x_coordinates = centers[:, 0]
@@ -91,3 +91,4 @@ def watercomputing(start=[0, 0], end=[47, -8], quality=33.5, area=0.5,
 
 if __name__ == "__main__":
     watercomputing()
+    cleanup_temp_files()
