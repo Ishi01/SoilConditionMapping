@@ -42,6 +42,9 @@ def setup_ui_logic(ui, MainWindow):
     # Set up "OpenTempDir" button click event
     ui.pushButtonTempDir.clicked.connect(lambda: open_directory(global_selected_temperature_file))
 
+    # Set up the "Reset" button click event to reset all inputs
+    ui.buttonBoxResetConfirmSave.button(QtWidgets.QDialogButtonBox.Reset).clicked.connect(lambda: reset_all_fields(ui))
+
 def start_inversion_with_parameters(ui):
     """
     Capture inversion parameters from the UI and initiate inversion processing.
