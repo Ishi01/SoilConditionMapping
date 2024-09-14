@@ -45,6 +45,9 @@ def setup_ui_logic(ui, MainWindow):
     # Set up the "Reset" button click event to reset all inputs
     ui.buttonBoxResetConfirmSave.button(QtWidgets.QDialogButtonBox.Reset).clicked.connect(lambda: reset_all_fields(ui))
 
+    # Set up the "Save" button click event to save the output
+    ui.buttonBoxResetConfirmSave.button(QtWidgets.QDialogButtonBox.Save).clicked.connect(lambda: save_output_file(ui))
+
 def start_inversion_with_parameters(ui):
     """
     Capture inversion parameters from the UI and initiate inversion processing.
