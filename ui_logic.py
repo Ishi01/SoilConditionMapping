@@ -188,6 +188,29 @@ def exit_application(MainWindow):
     QApplication.quit()
 
 
+def reset_all_fields(ui):
+    """
+    Reset all input fields in the UI to their default values.
+
+    Parameters:
+        ui: Instance of Ui_MainWindow.
+    """
+    # Reset geometry and inversion parameters
+    ui.startXLineEdit.setText("0")
+    ui.startZLineEdit.setText("0")
+    ui.endXLineEdit.setText("47")
+    ui.endZLineEdit.setText("-8")
+    ui.qualityLineEdit.setText("33.5")
+    ui.horizontalSlider.setValue(33)  # Set the slider to a default position corresponding to quality 33.5
+    ui.areaLineEdit.setText("0.5")
+    ui.LambdaLineEdit.setText("0.1")
+    ui.IterationLineEdit.setText("10")
+    ui.dPhiLineEdit.setText("0.01")
+    ui.checkBox.setChecked(False)  # Uncheck the "Robust Data" checkbox
+
+    # Clear text edits for file paths
+    ui.textEditProcessedTxtPreview.clear()
+    ui.textEditProcessedTempPreview.clear()
 
 
 def open_directory(directory):
