@@ -42,6 +42,38 @@ def setup_ui_logic(ui, MainWindow):
     # Set up "OpenTempDir" button click event
     ui.pushButtonTempDir.clicked.connect(lambda: open_directory(global_selected_temperature_file))
 
+def start_inversion_with_parameters(ui):
+    """
+    Capture inversion parameters from the UI and initiate inversion processing.
+
+    Parameters:
+        ui: Instance of Ui_MainWindow.
+    """
+    # Capture inversion parameters from the UI
+    start_x = float(ui.startXLineEdit.text()) if ui.startXLineEdit.text() else 0
+    start_z = float(ui.startZLineEdit.text()) if ui.startZLineEdit.text() else 0
+    end_x = float(ui.endXLineEdit.text()) if ui.endXLineEdit.text() else 47
+    end_z = float(ui.endZLineEdit.text()) if ui.endZLineEdit.text() else -8
+    quality = float(ui.horizontalSlider.value())
+    area = float(ui.areaLineEdit.text()) if ui.areaLineEdit.text() else 0.5
+    lambda_value = float(ui.LambdaLineEdit.text()) if ui.LambdaLineEdit.text() else 0.1
+    max_iterations = int(ui.IterationLineEdit.text()) if ui.IterationLineEdit.text() else 10
+    dphi = float(ui.dPhiLineEdit.text()) if ui.dPhiLineEdit.text() else 0.01
+    robust_data = ui.checkBox.isChecked()
+
+    # Pack parameters into dictionary
+    inversion_params = {
+        "lambda": lambda_value,
+        "max_iterations": max_iterations,
+        "dphi": dphi,
+        "robust_data": robust_data
+    }
+
+    # Start inversion process using ERT_Main's inversion function
+    threading.Thread(target=inversion, args=([start_x, start_z], [end_x, end_z], quality, area),
+                     kwargs={"inversion_params": inversion_params}).start()
+
+
 
 def open_file_browser(text_edit, tx0=True):
     """
