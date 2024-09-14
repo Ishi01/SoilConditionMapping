@@ -97,6 +97,7 @@ def watercomputing(start=[0, 0], end=[47, -8], quality=33.5, area=0.5,
         ax1.set_title(date)
         plt.savefig(os.path.join(output_folder, "result_water_content.jpg"))
         plt.close()
+        plt.close("all") 
 
 if __name__ == "__main__":
     watercomputing()
