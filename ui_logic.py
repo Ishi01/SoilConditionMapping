@@ -7,12 +7,12 @@ from data_processor import convert_tx0_to_txt, filter_temperature_data_by_date, 
 import tempfile
 import subprocess
 import platform
-from data_inversion.ERT_Main import startInversion, cleanup_temp_files
+from data_inversion.ERT_Main import startInversion
+from WaterContent.Water_Content_Main import water_computing
 
 # Global variables to store file paths
 global_tx0_input_folder = None  # Global variable to store the path of the tx0 folder
 global_selected_temperature_file = None  # Global variable to store the selected temperature file path
-
 
 def setup_ui_logic(ui, MainWindow):
     """
@@ -33,6 +33,10 @@ def setup_ui_logic(ui, MainWindow):
 
     # Set up "OK" button to capture inversion parameters and start inversion
     ui.buttonBoxResetConfirmSave.accepted.connect(lambda: start_inversion_with_parameters(ui))
+    ui.buttonBoxResetConfirmSave.accepted.connect(lambda: ui.stackedWidget.setCurrentWidget(ui.page_2))
+    ui.buttonBoxResetConfirmSave_2.accepted.connect(
+        lambda: start_water_computation_with_parameters(ui))
+    ui.buttonBoxResetConfirmSave_2.accepted.connect(lambda: ui.stackedWidget_2.setCurrentWidget(ui.page_3))
 
     # Set up the "Exit" menu exit event
     ui.actionExit.triggered.connect(lambda: exit_application(MainWindow))
@@ -45,9 +49,13 @@ def setup_ui_logic(ui, MainWindow):
 
     # Set up the "Reset" button click event to reset all inputs
     ui.buttonBoxResetConfirmSave.button(QDialogButtonBox.Reset).clicked.connect(lambda: reset_all_fields(ui))
+    ui.buttonBoxResetConfirmSave_2.button(QDialogButtonBox.Reset).clicked.connect(lambda: reset_all_fields(ui))
 
     # Set up the "Save" button click event to save the output
-    ui.buttonBoxResetConfirmSave.button(QDialogButtonBox.Reset).clicked.connect(lambda: save_output_file(ui, MainWindow))
+    ui.buttonBoxResetConfirmSave.button(QDialogButtonBox.Reset).clicked.connect(
+        lambda: save_output_file(ui, MainWindow))
+    ui.buttonBoxResetConfirmSave_2.button(QDialogButtonBox.Reset).clicked.connect(
+        lambda: save_output_file(ui, MainWindow))
 
 
 def start_inversion_with_parameters(ui):
@@ -80,7 +88,6 @@ def start_inversion_with_parameters(ui):
     # Start inversion process using ERT_Main's inversion function
     threading.Thread(target=startInversion, args=([start_x, start_z], [end_x, end_z], quality, area),
                      kwargs={"inversion_params": inversion_params}).start()
-
 
 
 def open_file_browser(text_edit, tx0=True):
@@ -235,6 +242,7 @@ def open_directory(directory):
     else:
         print("Directory path is empty. Please select a valid directory.")
 
+
 def select_processed_file():
     """
     Open Browser to select processed files
@@ -252,7 +260,7 @@ def select_processed_file():
 
 def select_processed_file():
     """
-    打开文件选择对话框以选择处理好的文件（如.txt等），并返回其路径。
+    Open File Dialog for processed file selection
     """
     options = QFileDialog.Options()
     file_path, _ = QFileDialog.getOpenFileName(None, "Select Processed File", "", "Text Files (*.txt);;All Files (*)",
@@ -265,6 +273,9 @@ def select_processed_file():
         return None
 
 
+global_inversion_params = {}
+
+
 def start_inversion_with_parameters(ui):
     """
     Capture inversion parameters from the UI and initiate inversion processing.
@@ -272,6 +283,8 @@ def start_inversion_with_parameters(ui):
     Parameters:
         ui: Instance of Ui_MainWindow.
     """
+    global global_inversion_params
+
     # Capture inversion parameters from the UI
     try:
         start_x = float(ui.startXLineEdit.text()) if ui.startXLineEdit.text() else 0
@@ -290,6 +303,20 @@ def start_inversion_with_parameters(ui):
         # Optionally handle the error by showing a message box or logging
         return
 
+    # Pack the Inversion params
+    global_inversion_params = {
+        "start_x": start_x,
+        "start_z": start_z,
+        "end_x": end_x,
+        "end_z": end_z,
+        "quality": quality,
+        "area": area,
+        "lambda": lambda_value,
+        "max_iterations": max_iterations,
+        "dphi": dphi,
+        "robust_data": robust_data
+    }
+
     processed_file_path = select_processed_file()
 
     if processed_file_path:
@@ -301,20 +328,74 @@ def start_inversion_with_parameters(ui):
         }
 
         # Start inversion process using the selected file and parameters
-        threading.Thread(target=startInversion, args=([start_x, start_z], [end_x, end_z], quality, area),
-                         kwargs={"inversion_params": inversion_params, "file_path": processed_file_path}).start()
+        inversion_thread = threading.Thread(target=startInversion, args=([start_x, start_z], [end_x, end_z], quality, area),
+                         kwargs={"inversion_params": inversion_params, "file_path": processed_file_path})
+        inversion_thread.start()
+        inversion_thread.join()
     else:
         print("No processed file selected. Please select a file first.")
 
 
+def start_water_computation_with_parameters(ui):
+    """
+    Capture water computation parameters from the UI and initiate the process.
+    Use inversion parameters if A and B are not specified.
+    """
+    global global_inversion_params
+
+    processed_file_path = select_processed_file()
+
+    if not processed_file_path:
+        print("No processed file selected. Please select a file first.")
+        return
+
+    try:
+        # Capture UI values
+        start_x = float(ui.startXLineEdit_WC.text()) if ui.startXLineEdit_WC.text() else global_inversion_params.get(
+            "start_x",
+            0)
+        start_z = float(ui.startZLineEdit_WC.text()) if ui.startZLineEdit_WC.text() else global_inversion_params.get(
+            "start_z",
+            0)
+        end_x = float(ui.endXLineEdit_WC.text()) if ui.endXLineEdit_WC.text() else global_inversion_params.get("end_x",
+                                                                                                               47)
+        end_z = float(ui.endZLineEdit_WC.text()) if ui.endZLineEdit_WC.text() else global_inversion_params.get("end_z",
+                                                                                                               -8)
+        quality = float(ui.qualityLineEdit_WC.text()) if ui.qualityLineEdit_WC.text() else global_inversion_params.get(
+            "quality", 33.5)
+        area = float(ui.areaLineEdit_WC.text()) if ui.areaLineEdit_WC.text() else global_inversion_params.get("area",
+                                                                                                              0.5)
+        lambda_value = float(
+            ui.LambdaLineEdit_WC.text()) if ui.LambdaLineEdit_WC.text() else global_inversion_params.get(
+            "lambda", 10)
+        max_iterations = int(
+            ui.IterationLineEdit_WC.text()) if ui.IterationLineEdit_WC.text() else global_inversion_params.get(
+            "max_iterations", 6)
+        dphi = float(ui.dPhiLineEdit_WC.text()) if ui.dPhiLineEdit_WC.text() else global_inversion_params.get("dphi", 2)
+
+        A = float(ui.ALineEdit.text()) if ui.ALineEdit.text() else 246.47
+        B = float(ui.BLineEdit.text()) if ui.BLineEdit.text() else -0.627
+
+    except ValueError as e:
+        print(f"Error in conversion: {e}")
+        return
+
+    water_computing(
+        [start_x, start_z], [end_x, end_z], quality, area, lambda_value, max_iterations, dphi, A, B,
+        processed_file_path
+    )
+
+
 def save_output_file(ui, MainWindow):
     options = QFileDialog.Options()
-    file_name, _ = QFileDialog.getSaveFileName(MainWindow, "Save Output File", "", "Text Files (*.txt);;All Files (*)", options=options)
+    file_name, _ = QFileDialog.getSaveFileName(MainWindow, "Save Output File", "", "Text Files (*.txt);;All Files (*)",
+                                               options=options)
     if file_name:
         output_content = get_output_content(ui)
         with open(file_name, 'w') as file:
             file.write(output_content)
         print(f"Output saved to {file_name}")
+
 
 def get_output_content(ui):
     output_file_path = ui.textEditProcessedTxtPreview.toPlainText()
