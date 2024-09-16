@@ -234,16 +234,17 @@ def open_directory(directory):
         print("Directory path is empty. Please select a valid directory.")
 
 
-def save_output_file(ui):
+def save_output_file(ui, MainWindow):
     """
     Opens a file dialog to allow the user to save the output to a location on their computer.
 
     Parameters:
         ui: Instance of Ui_MainWindow.
+        MainWindow: Instance of QMainWindow.
     """
     # Open a file dialog to select the location and filename to save the output
     options = QFileDialog.Options()
-    file_name, _ = QFileDialog.getSaveFileName(None, "Save Output File", "", "Text Files (*.txt);;All Files (*)", options=options)
+    file_name, _ = QFileDialog.getSaveFileName(MainWindow, "Save Output File", "", "Text Files (*.txt);;All Files (*)", options=options)
 
     if file_name:
         # Define what to save in the output file
