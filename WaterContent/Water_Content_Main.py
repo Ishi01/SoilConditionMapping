@@ -112,6 +112,7 @@ def water_computing(start=[0, 0], end=[47, -8], quality=33.5, area=0.5,
 
         cleanup_temp_files()
 
+    return fig_filename
 
 # if __name__ == "__main__":
 #     water_computing()

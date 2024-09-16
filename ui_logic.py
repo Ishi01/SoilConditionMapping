@@ -3,6 +3,8 @@ import shutil
 import threading
 from PyQt5.QtWidgets import QFileDialog, QApplication, QDialogButtonBox
 from pathlib import Path
+from PyQt5.QtGui import QPixmap
+from PyQt5.uic.properties import QtCore
 from data_processor import convert_tx0_to_txt, filter_temperature_data_by_date, calibrate_resistivity
 import tempfile
 import subprocess
@@ -380,10 +382,15 @@ def start_water_computation_with_parameters(ui):
         print(f"Error in conversion: {e}")
         return
 
-    water_computing(
-        [start_x, start_z], [end_x, end_z], quality, area, lambda_value, max_iterations, dphi, A, B,
-        processed_file_path
-    )
+    try:
+        image_path = water_computing(
+            [start_x, start_z], [end_x, end_z], quality, area, lambda_value,
+            max_iterations, dphi, A, B, processed_file_path
+        )
+
+        water_computing_finished(ui, image_path)
+    except Exception as e:
+        print(f"Error during water_computing: {e}")
 
 
 def save_output_file(ui, MainWindow):
@@ -404,4 +411,17 @@ def get_output_content(ui):
             content = file.read()
         return content
     return "No output file selected or file not found."
+
+def water_computing_finished(ui, image_path):
+    if image_path and os.path.exists(image_path):
+        pixmap = QPixmap(image_path)
+        ui.labelSWC.setPixmap(pixmap)
+        ui.labelSWC.setScaledContents(True)
+        ui.labelSWC.setAlignment(QtCore.Qt.AlignCenter)
+        print(f"Image displayed on labelSWC: {image_path}")
+
+        ui.stackedWidget_2.setCurrentWidget(ui.page_3)
+    else:
+        print("Image path is invalid or file does not exist.")
+
 
