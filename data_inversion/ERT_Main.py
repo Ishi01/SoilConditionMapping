@@ -134,6 +134,8 @@ def startInversion(start, end, quality, area, inversion_params, file_path, zWeig
 
     cleanup_temp_files()
 
+    return fig_filename  # Return the path of the saved figure
+
 # if __name__ == "__main__":
 #     startInversion()
 #     cleanup_temp_files()
