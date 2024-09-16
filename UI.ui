@@ -297,7 +297,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_2">
        <widget class="QTextEdit" name="textEdit_9">
@@ -348,14 +348,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <widget class="QToolButton" name="toolButton">
         <property name="geometry">
          <rect>
-          <x>770</x>
+          <x>720</x>
           <y>560</y>
-          <width>81</width>
+          <width>131</width>
           <height>22</height>
          </rect>
         </property>
         <property name="text">
-         <string>Save To</string>
+         <string>Open Image Directory</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_9">
@@ -781,6 +781,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
         </property>
         <property name="text">
          <string>Area: Determines the maximum cell size in the mesh, affecting the level of detail in the model.</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButtonSelectProcessedFile">
+        <property name="geometry">
+         <rect>
+          <x>384</x>
+          <y>550</y>
+          <width>141</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Browser Processed File</string>
         </property>
        </widget>
       </widget>

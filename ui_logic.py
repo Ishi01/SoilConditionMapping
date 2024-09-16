@@ -1,12 +1,13 @@
 import os
 import shutil
 import threading
-from PyQt5.QtWidgets import QFileDialog, QApplication
+from PyQt5.QtWidgets import QFileDialog, QApplication, QDialogButtonBox
 from pathlib import Path
 from data_processor import convert_tx0_to_txt, filter_temperature_data_by_date, calibrate_resistivity
 import tempfile
 import subprocess
 import platform
+from data_inversion.ERT_Main import startInversion
 
 # Global variables to store file paths
 global_tx0_input_folder = None  # Global variable to store the path of the tx0 folder
@@ -30,6 +31,9 @@ def setup_ui_logic(ui, MainWindow):
     # Set up the "Start" button click event (for data processing)
     ui.pushButtonStartDataProcessing.clicked.connect(lambda: start_data_processing_thread(ui))
 
+    # Set up "OK" button to capture inversion parameters and start inversion
+    ui.buttonBoxResetConfirmSave.accepted.connect(lambda: start_inversion_with_parameters(ui))
+
     # Set up the "Exit" menu exit event
     ui.actionExit.triggered.connect(lambda: exit_application(MainWindow))
 
@@ -38,6 +42,45 @@ def setup_ui_logic(ui, MainWindow):
 
     # Set up "OpenTempDir" button click event
     ui.pushButtonTempDir.clicked.connect(lambda: open_directory(global_selected_temperature_file))
+
+    # Set up the "Reset" button click event to reset all inputs
+    ui.buttonBoxResetConfirmSave.button(QDialogButtonBox.Reset).clicked.connect(lambda: reset_all_fields(ui))
+
+    # Set up the "Save" button click event to save the output
+    ui.buttonBoxResetConfirmSave.button(QDialogButtonBox.Reset).clicked.connect(lambda: save_output_file(ui, MainWindow))
+
+
+def start_inversion_with_parameters(ui):
+    """
+    Capture inversion parameters from the UI and initiate inversion processing.
+
+    Parameters:
+        ui: Instance of Ui_MainWindow.
+    """
+    # Capture inversion parameters from the UI
+    start_x = float(ui.startXLineEdit.text()) if ui.startXLineEdit.text() else 0
+    start_z = float(ui.startZLineEdit.text()) if ui.startZLineEdit.text() else 0
+    end_x = float(ui.endXLineEdit.text()) if ui.endXLineEdit.text() else 47
+    end_z = float(ui.endZLineEdit.text()) if ui.endZLineEdit.text() else -8
+    quality = float(ui.horizontalSlider.value())
+    area = float(ui.areaLineEdit.text()) if ui.areaLineEdit.text() else 0.5
+    lambda_value = float(ui.LambdaLineEdit.text()) if ui.LambdaLineEdit.text() else 0.1
+    max_iterations = int(ui.IterationLineEdit.text()) if ui.IterationLineEdit.text() else 10
+    dphi = float(ui.dPhiLineEdit.text()) if ui.dPhiLineEdit.text() else 0.01
+    robust_data = ui.checkBox.isChecked()
+
+    # Pack parameters into dictionary
+    inversion_params = {
+        "lambda": lambda_value,
+        "max_iterations": max_iterations,
+        "dphi": dphi,
+        "robust_data": robust_data
+    }
+
+    # Start inversion process using ERT_Main's inversion function
+    threading.Thread(target=startInversion, args=([start_x, start_z], [end_x, end_z], quality, area),
+                     kwargs={"inversion_params": inversion_params}).start()
+
 
 
 def open_file_browser(text_edit, tx0=True):
@@ -110,13 +153,19 @@ def start_data_processing(ui):
         print("Please use the 'Browser' button to select the temperature file first.")
         return
 
-    # Set output directories
+    # Select Output Directory
+    output_directory = QFileDialog.getExistingDirectory(None, "Select Output Directory", "")
+    if not output_directory:  # use default if cancelled
+        output_directory = os.path.join(os.getcwd(), 'outputs')
+
+    corrected_output_folder_detailed = Path(output_directory, 'corrected_resistivity_detailed')
+    corrected_output_folder_simplified = Path(output_directory, 'corrected_resistivity_simplified')
+    corrected_output_folder_detailed.mkdir(parents=True, exist_ok=True)
+    corrected_output_folder_simplified.mkdir(parents=True, exist_ok=True)
+
+    # Set output directories for temporary files
     txt_output_folder = Path(tempfile.mkdtemp())
     filtered_temp_output = Path(tempfile.mkdtemp(), 'Newtem.txt')
-    corrected_output_folder_detailed = Path(os.getcwd(),
-                                            'outputs/corrected_resistivity_detailed')  # Save in project folder
-    corrected_output_folder_simplified = Path(os.getcwd(),
-                                              'outputs/corrected_resistivity_simplified')  # Save in project folder
 
     # Step 1: Convert tx0 to txt
     convert_tx0_to_txt(global_tx0_input_folder, txt_output_folder, converter_choice)
@@ -134,8 +183,6 @@ def start_data_processing(ui):
     print("Data processing completed.")
 
 
-
-
 def exit_application(MainWindow):
     """
     Exit the application.
@@ -146,6 +193,29 @@ def exit_application(MainWindow):
     QApplication.quit()
 
 
+def reset_all_fields(ui):
+    """
+    Reset all input fields in the UI to their default values.
+
+    Parameters:
+        ui: Instance of Ui_MainWindow.
+    """
+    # Reset geometry and inversion parameters
+    ui.startXLineEdit.setText("0")
+    ui.startZLineEdit.setText("0")
+    ui.endXLineEdit.setText("47")
+    ui.endZLineEdit.setText("-8")
+    ui.qualityLineEdit.setText("33.5")
+    ui.horizontalSlider.setValue(33)  # Set the slider to a default position corresponding to quality 33.5
+    ui.areaLineEdit.setText("0.5")
+    ui.LambdaLineEdit.setText("0.1")
+    ui.IterationLineEdit.setText("10")
+    ui.dPhiLineEdit.setText("0.01")
+    ui.checkBox.setChecked(False)  # Uncheck the "Robust Data" checkbox
+
+    # Clear text edits for file paths
+    ui.textEditProcessedTxtPreview.clear()
+    ui.textEditProcessedTempPreview.clear()
 
 
 def open_directory(directory):
@@ -164,3 +234,87 @@ def open_directory(directory):
             subprocess.Popen(["xdg-open", directory])
     else:
         print("Directory path is empty. Please select a valid directory.")
+
+def select_processed_file():
+    """
+    Open Browser to select processed files
+    """
+    options = QFileDialog.Options()
+    file_path, _ = QFileDialog.getOpenFileName(None, "Select Processed File", "", "Text Files (*.txt);;All Files (*)",
+                                               options=options)
+    if file_path:
+        print(f"Selected processed file: {file_path}")
+        return file_path
+    else:
+        print("No file selected.")
+        return None
+
+
+def select_processed_file():
+    """
+    打开文件选择对话框以选择处理好的文件（如.txt等），并返回其路径。
+    """
+    options = QFileDialog.Options()
+    file_path, _ = QFileDialog.getOpenFileName(None, "Select Processed File", "", "Text Files (*.txt);;All Files (*)",
+                                               options=options)
+    if file_path:
+        print(f"Selected processed file: {file_path}")
+        return file_path
+    else:
+        print("No file selected.")
+        return None
+
+
+def start_inversion_with_parameters(ui):
+    """
+    Capture inversion parameters from the UI and initiate inversion processing.
+
+    Parameters:
+        ui: Instance of Ui_MainWindow.
+    """
+    # Capture inversion parameters from the UI
+    start_x = float(ui.startXLineEdit.text()) if ui.startXLineEdit.text() else 0
+    start_z = float(ui.startZLineEdit.text()) if ui.startZLineEdit.text() else 0
+    end_x = float(ui.endXLineEdit.text()) if ui.endXLineEdit.text() else 47
+    end_z = float(ui.endZLineEdit.text()) if ui.endZLineEdit.text() else -8
+    quality = float(ui.horizontalSlider.value())
+    area = float(ui.areaLineEdit.text()) if ui.areaLineEdit.text() else 0.5
+    lambda_value = float(ui.LambdaLineEdit.text()) if ui.LambdaLineEdit.text() else 0.1
+    max_iterations = int(ui.IterationLineEdit.text()) if ui.IterationLineEdit.text() else 10
+    dphi = float(ui.dPhiLineEdit.text()) if ui.dPhiLineEdit.text() else 0.01
+    robust_data = ui.checkBox.isChecked()
+
+    processed_file_path = select_processed_file()
+
+    if processed_file_path:
+        inversion_params = {
+            "lambda": lambda_value,
+            "max_iterations": max_iterations,
+            "dphi": dphi,
+            "robust_data": robust_data
+        }
+
+        # Start inversion process using the selected file and parameters
+        threading.Thread(target=startInversion, args=([start_x, start_z], [end_x, end_z], quality, area),
+                         kwargs={"inversion_params": inversion_params, "file_path": processed_file_path}).start()
+    else:
+        print("No processed file selected. Please select a file first.")
+
+
+def save_output_file(ui, MainWindow):
+    options = QFileDialog.Options()
+    file_name, _ = QFileDialog.getSaveFileName(MainWindow, "Save Output File", "", "Text Files (*.txt);;All Files (*)", options=options)
+    if file_name:
+        output_content = get_output_content(ui)
+        with open(file_name, 'w') as file:
+            file.write(output_content)
+        print(f"Output saved to {file_name}")
+
+def get_output_content(ui):
+    output_file_path = ui.textEditProcessedTxtPreview.toPlainText()
+    if os.path.exists(output_file_path):
+        with open(output_file_path, 'r') as file:
+            content = file.read()
+        return content
+    return "No output file selected or file not found."
+

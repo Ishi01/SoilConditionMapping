@@ -110,7 +110,7 @@ class Ui_MainWindow(object):
         self.graphicsViewDepth.setGeometry(QtCore.QRect(100, 350, 651, 201))
         self.graphicsViewDepth.setObjectName("graphicsViewDepth")
         self.toolButton = QtWidgets.QToolButton(self.page_2)
-        self.toolButton.setGeometry(QtCore.QRect(770, 560, 81, 22))
+        self.toolButton.setGeometry(QtCore.QRect(720, 560, 131, 22))
         self.toolButton.setObjectName("toolButton")
         self.label_9 = QtWidgets.QLabel(self.page_2)
         self.label_9.setGeometry(QtCore.QRect(360, 60, 111, 21))
@@ -421,7 +421,7 @@ class Ui_MainWindow(object):
 "li.checked::marker { content: \"\\2612\"; }\n"
 "</style></head><body style=\" font-family:\'Segoe UI\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas\'; font-size:12pt; color:#838383;\">Inversion Output</span></p></body></html>"))
-        self.toolButton.setText(_translate("MainWindow", "Save To"))
+        self.toolButton.setText(_translate("MainWindow", "Open Image Directory"))
         self.label_9.setText(_translate("MainWindow", "Apparent Resistivity"))
         self.label_10.setText(_translate("MainWindow", "Resistivity in Depth"))
         self.startXLabel.setText(_translate("MainWindow", "Start X"))
