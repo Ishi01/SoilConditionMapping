@@ -34,14 +34,14 @@ def cleanup_temp_files():
                 print(f"Error removing {file}: {e}")
 
 
-def get_first_raw_file():
-    raw_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Raw")
-    files = [
-        f for f in os.listdir(raw_folder) if os.path.isfile(os.path.join(raw_folder, f))
-    ]
-    if not files:
-        raise FileNotFoundError("No files found in the Raw folder")
-    return os.path.join(raw_folder, sorted(files)[0])
+# def get_first_raw_file():
+#     raw_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Raw")
+#     files = [
+#         f for f in os.listdir(raw_folder) if os.path.isfile(os.path.join(raw_folder, f))
+#     ]
+#     if not files:
+#         raise FileNotFoundError("No files found in the Raw folder")
+#     return os.path.join(raw_folder, sorted(files)[0])
 
 
 def create_mesh(start=[0, 0], end=[47, -8], quality=33.5, area=0.5):
@@ -132,6 +132,7 @@ def startInversion(start, end, quality, area, inversion_params, file_path, zWeig
     plt.close(fig1)
     plt.close("all")
 
+    cleanup_temp_files()
 
 # if __name__ == "__main__":
 #     startInversion()

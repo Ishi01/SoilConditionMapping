@@ -5,7 +5,7 @@
    - **Input**: `tx0_files` folder
    - **Output**: `output_txt_offset` folder
 
-```python
+```bash
 python tx0_to_txt_offset.py tx0_files/ output_txt_offset/
 
 ```
@@ -16,7 +16,7 @@ python tx0_to_txt_offset.py tx0_files/ output_txt_offset/
    - **Input**: `output_txt_offset` folder and `GNtemp.txt` file
    - **Output**: `Newtem.txt` 
 
-```python
+```bash
 python Newtem.py output_txt_offset/ GNtemp.txt
 
 ```
@@ -27,7 +27,7 @@ python Newtem.py output_txt_offset/ GNtemp.txt
    - **Input**: `output_txt_offset` folder and `Newtem.txt` file
    - **Output**: `tx0_to_txt_temp` folder
 
-```python
+```bash
 python txt_temp.py Newtem.txt output_txt_offset/ 
 ```
 
@@ -36,7 +36,7 @@ python txt_temp.py Newtem.txt output_txt_offset/
    - **Input**: `tx0_files` folder and  `GNtemp.txt` file
    - **Output**: `tx0_to_txt_temp` folder
 
-```python
+```bash
 python auto_tx0_txt_temp.py
 ```
 

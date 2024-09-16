@@ -7,7 +7,7 @@ from data_processor import convert_tx0_to_txt, filter_temperature_data_by_date, 
 import tempfile
 import subprocess
 import platform
-from data_inversion.ERT_Main import startInversion
+from data_inversion.ERT_Main import startInversion, cleanup_temp_files
 
 # Global variables to store file paths
 global_tx0_input_folder = None  # Global variable to store the path of the tx0 folder
@@ -273,16 +273,22 @@ def start_inversion_with_parameters(ui):
         ui: Instance of Ui_MainWindow.
     """
     # Capture inversion parameters from the UI
-    start_x = float(ui.startXLineEdit.text()) if ui.startXLineEdit.text() else 0
-    start_z = float(ui.startZLineEdit.text()) if ui.startZLineEdit.text() else 0
-    end_x = float(ui.endXLineEdit.text()) if ui.endXLineEdit.text() else 47
-    end_z = float(ui.endZLineEdit.text()) if ui.endZLineEdit.text() else -8
-    quality = float(ui.horizontalSlider.value())
-    area = float(ui.areaLineEdit.text()) if ui.areaLineEdit.text() else 0.5
-    lambda_value = float(ui.LambdaLineEdit.text()) if ui.LambdaLineEdit.text() else 0.1
-    max_iterations = int(ui.IterationLineEdit.text()) if ui.IterationLineEdit.text() else 10
-    dphi = float(ui.dPhiLineEdit.text()) if ui.dPhiLineEdit.text() else 0.01
-    robust_data = ui.checkBox.isChecked()
+    try:
+        start_x = float(ui.startXLineEdit.text()) if ui.startXLineEdit.text() else 0
+        start_z = float(ui.startZLineEdit.text()) if ui.startZLineEdit.text() else 0
+        end_x = float(ui.endXLineEdit.text()) if ui.endXLineEdit.text() else 47
+        end_z = float(ui.endZLineEdit.text()) if ui.endZLineEdit.text() else -8
+        quality = float(ui.qualityLineEdit.text()) if ui.qualityLineEdit.text() else 33.5
+        area = float(ui.areaLineEdit.text()) if ui.areaLineEdit.text() else 0.5
+        lambda_value = float(ui.LambdaLineEdit.text()) if ui.LambdaLineEdit.text() else 7
+        max_iterations = int(ui.IterationLineEdit.text()) if ui.IterationLineEdit.text() else 6
+        dphi = float(ui.dPhiLineEdit.text()) if ui.dPhiLineEdit.text() else 2
+        robust_data = ui.checkBox.isChecked()
+
+    except ValueError as e:
+        print(f"Error in conversion: {e}")
+        # Optionally handle the error by showing a message box or logging
+        return
 
     processed_file_path = select_processed_file()
 
