@@ -95,7 +95,14 @@ def watercomputing(start=[0, 0], end=[47, -8], quality=33.5, area=0.5,
         ax1.set_xlim(-0, mgr.paraDomain.xmax())
         ax1.set_ylim(-8, mgr.paraDomain.ymax())
         ax1.set_title(date)
-        plt.savefig(os.path.join(output_folder, "result_water_content.jpg"))
+       
+        fig_filename = os.path.join(
+        output_folder, f"Water_result_{os.path.splitext(date)[0]}.png"
+        )
+        plt.savefig(fig_filename, dpi=300, bbox_inches="tight")
+        print(f"Figure saved as: {fig_filename}")
+        
+        
         plt.close()
         plt.close("all") 
 
