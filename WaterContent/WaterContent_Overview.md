@@ -63,11 +63,11 @@ flowchart TD
 
 - **`watercomputing()`**: Manages the process of loading data, performing ERT inversion, calculating water content, and visualizing the results.
   **Parameters:**
-- `start`, `end`, `quality`, `area`: Used to generate the mesh.
-- `lam`: Regularization parameter for inversion.
-- `maxIter`: Maximum number of iterations for the inversion.
-- `dPhi`: Desired misfit change in percentage.
-- `A`, `B`: Constants used in the soil water content calculation.
+  - `start`, `end`, `quality`, `area`: Used to generate the mesh.
+  - `lam`: Regularization parameter for inversion.
+  - `maxIter`: Maximum number of iterations for the inversion.
+  - `dPhi`: Desired misfit change in percentage.
+  - `A`, `B`: Constants used in the soil water content calculation.
 
 # Display
 
@@ -75,9 +75,13 @@ flowchart TD
 
 The script saves output plots in the `Output` directory. Each plot file is named according to the data file's name with an additional `Water_result` prefix.
 
+![alt text](image.png)
+
 #### Plotting:
 
 After inversion, a plot of the result is generated using Matplotlib. The plot shows the resistivity data and is saved as a `.PNG` file.
+
+![alt text](image-1.png)
 
 # Conclusion
 

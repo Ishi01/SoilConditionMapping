@@ -18,7 +18,7 @@ def ensure_output_folder():
 def cleanup_temp_files():
     patterns = [
         "*.vector", "*.matrix", "*.bmat",
-        "fop-model1.vtk", "invalid.data", "mesh.bms"
+        "*.vtk", "invalid.data", "mesh.bms"
     ]
     for pattern in patterns:
         for file in glob.glob(pattern):
