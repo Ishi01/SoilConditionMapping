@@ -3,6 +3,10 @@ import shutil
 import threading
 from PyQt5.QtWidgets import QFileDialog, QApplication
 from pathlib import Path
+
+from PyQt5.uic.properties import QtWidgets
+
+from ERT_Main import inversion
 from data_processor import convert_tx0_to_txt, filter_temperature_data_by_date, calibrate_resistivity
 import tempfile
 import subprocess
@@ -214,6 +218,54 @@ def reset_all_fields(ui):
     # Clear text edits for file paths
     ui.textEditProcessedTxtPreview.clear()
     ui.textEditProcessedTempPreview.clear()
+
+def get_output_content(ui):
+    """
+    Retrieves the output content from the UI components to be saved in a file.
+
+    Parameters:
+        ui: Instance of Ui_MainWindow.
+
+    Returns:
+        A string containing the formatted output content to be saved.
+    """
+    # Gather inversion parameters from the UI
+    start_x = ui.startXLineEdit.text()
+    start_z = ui.startZLineEdit.text()
+    end_x = ui.endXLineEdit.text()
+    end_z = ui.endZLineEdit.text()
+    quality = ui.qualityLineEdit.text()
+    area = ui.areaLineEdit.text()
+    lambda_value = ui.LambdaLineEdit.text()
+    max_iterations = ui.IterationLineEdit.text()
+    dphi = ui.dPhiLineEdit.text()
+    robust_data = ui.checkBox.isChecked()
+
+    # Get file paths from text edits
+    processed_txt_files = ui.textEditProcessedTxtPreview.toPlainText()
+    processed_temp_files = ui.textEditProcessedTempPreview.toPlainText()
+
+    # Format the collected data into a string for saving
+    output_content = (
+        "Inversion Parameters:\n"
+        f"Start X: {start_x}\n"
+        f"Start Z: {start_z}\n"
+        f"End X: {end_x}\n"
+        f"End Z: {end_z}\n"
+        f"Quality: {quality}\n"
+        f"Area: {area}\n"
+        f"Lambda: {lambda_value}\n"
+        f"Max Iterations: {max_iterations}\n"
+        f"dPhi: {dphi}\n"
+        f"Robust Data: {'Yes' if robust_data else 'No'}\n\n"
+        "Processed Tx0 Files:\n"
+        f"{processed_txt_files}\n\n"
+        "Processed Temperature Files:\n"
+        f"{processed_temp_files}\n"
+    )
+
+    return output_content
+
 
 
 def open_directory(directory):
