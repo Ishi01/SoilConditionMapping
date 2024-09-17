@@ -292,7 +292,7 @@ def main():
                                     # 输入数据目录
 
     #Ask user how they would like to input temperature
-    user_choice = input("Would you like to enter temp data maually (1) or use a file (2)")
+    user_choice = input("Would you like to enter temp data manually (1) or use a file (2)")
     
     if (user_choice == "1"):
         temp_date_dict = manual_temp_console_input()
