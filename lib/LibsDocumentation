@@ -1,0 +1,88 @@
+
+# txt_temp.py Documentation
+
+# Function: tx0_to_txt_offset(input_folder, output_folder)
+# Input:
+input_folder: A string representing the path to the folder containing .tx0 files.
+output_folder: A string representing the path to the folder where the converted .txt files will be saved.
+
+# Output:
+This function processes .tx0 files in the input folder by correcting electrode position offsets in measurement data if the first electrode index does not start at 1. It saves the modified data as .txt files in the output folder.
+# Function: load_temperature_data(temperature_file)
+# Input:
+temperature_file: A string representing the path to the temperature data file (in tab-separated format).
+
+# Output:
+This function loads temperature data from the file and returns a dictionary with the following structure:
+"date": The date corresponding to the temperature readings.
+"temperatures": A list of temperature values for that date.
+
+# Function: interpolate_temperature(z, depths, temperatures)
+# Input:
+z: A float representing the depth for which the temperature needs to be interpolated.
+depths: A list of floats representing the depths at which temperature readings are available.
+temperatures: A list of floats representing temperature readings at the corresponding depths.
+# Output:
+Returns the interpolated temperature value at the specified depth z.
+
+# Function: apply_calibration(resistivity, temperature)
+# Input:
+resistivity: A float representing the resistivity value to be calibrated.
+temperature: A float representing the temperature value used for calibration.
+
+# Output:
+Returns the calibrated resistivity value based on the temperature using a linear correction formula.
+
+# Function: manual_temp_console_input()
+# Input:
+None. This is an interactive function.
+
+# Output:
+This function prompts the user to manually input a date and temperature values at specific depths. It returns a dictionary containing:
+"date": The user-input date.
+"temperatures": A list of manually entered temperature values.
+
+# Function: manual_temp(date, temp4, temp35, temp3, temp15, temp1, temp05)
+# Input:
+date: A string representing the date.
+temp4, temp35, temp3, temp15, temp1, temp05: Floats representing temperatures at different depths (-4m, -3.5m, -3m, -1.5m, -1m, and -0.5m).
+
+# Output:
+Returns a dictionary containing the date and the list of temperatures provided.
+
+# Function: process_files(data_dir, output_dir, output_dir2, temp_date_dict)
+# Input:
+data_dir: A string representing the directory containing .txt data files.
+output_dir: A string representing the directory where detailed output files will be saved.
+output_dir2: A string representing the directory where simplified output files will be saved.
+temp_date_dict: A dictionary containing temperature data, as returned by the manual_temp or load_temperature_data function.
+
+# Output:
+This function reads data from .txt files, applies temperature-based corrections to the resistivity values, and saves the processed data in both detailed and simplified formats in the specified output directories.
+
+# Function: main()
+# Input:
+None. This is an interactive function.
+
+# Output:
+The function asks the user to select input and output directories. It also prompts the user to provide temperature data either manually or via a file. After gathering this information, the function processes the .txt files and applies temperature corrections to the resistivity data, saving the results in the specified output directories.
+
+
+
+# Newtem.py Documentation
+
+# Function: extract_dates_from_filenames(data_dir)
+# Input:
+data_dir (str): Directory path containing .txt files.
+
+# Output:
+Returns a list of date strings extracted from the filenames in the data_dir. It assumes filenames follow the format 'YYYY-MM-DD_otherinfo.txt'.
+
+# Function: filter_temperature_data(temperature_file, dates, output_file)
+# Input:
+temperature_file (str): Path to the temperature data file (tab-separated values).
+dates (list of str): List of date strings extracted from the .txt filenames.
+output_file (str): Path where the filtered temperature data will be saved.
+
+# Output:
+Filters the temperature data to retain only the records matching the dates found in the .txt filenames, and saves the filtered data to the specified output_file.

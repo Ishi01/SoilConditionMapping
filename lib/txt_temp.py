@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 import tkinter as tk
 from tkinter import filedialog
-import Newtem
+import lib.Newtem as Newtem
 
 
 def tx0_to_txt_offset(input_folder, output_folder):
