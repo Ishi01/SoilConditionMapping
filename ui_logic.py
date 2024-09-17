@@ -359,6 +359,17 @@ def start_inversion_with_parameters(ui):
             "dphi": dphi,
             "robust_data": robust_data
         }
+        run_inversion_and_display_output(
+            ui,
+            [start_x, start_z],
+            [end_x, end_z],
+            quality,
+            area,
+            inversion_params,
+            processed_file_path
+        )
+
+        ui.stackedWidget.setCurrentWidget(ui.page_2)
 
         # Start inversion process using the selected file and parameters
         inversion_thread = threading.Thread(target=startInversion, args=([start_x, start_z], [end_x, end_z], quality, area),
@@ -442,6 +453,7 @@ def get_output_content(ui):
             content = file.read()
         return content
     return "No output file selected or file not found."
+
 
 def water_computing_finished(ui, image_path):
     if image_path and os.path.exists(image_path):
