@@ -1,7 +1,6 @@
 # Instructions for Use
 
-In order to use these files for the data preprocessing, all that needs to be done is to run txt_temp.py's main method
-imported like a package. This form will work, but edits will need to be made to integrate the functions and data input with the UI
+In order to use these files for the data preprocessing, all that needs to be done is to run txt_temp.py's main method imported like a package. This form will work, but edits will need to be made to integrate the functions and data input with the UI
 
 
 
