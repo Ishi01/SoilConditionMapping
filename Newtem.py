@@ -33,12 +33,15 @@ def main():
     #Select the temperature
 
     # Path to the original temperature file
+    #Note that this just gets the location of the file that the user is currently in, needs to be changed!!!!
+    #Once we determine the final structure of the program
     current_folder = os.getcwd()
     #temperature_file = "GNtemp.txt"
     temp_msg = "Please select the temperature file"
     temperature_file = filedialog.askopenfilename(initialdir=current_folder, title=temp_msg)
     
     # Path to save the filtered temperature data
+    #Same with this, once we decide the final structure this needs to be changed
     output_file = "GeneratedTemp.txt"
 
     # Extract dates from filenames

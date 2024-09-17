@@ -1,5 +1,9 @@
 # Data Processing Workflow for tx0_to_txt_temp Pipeline
 
+
+# THIS NEEDS TO BE COMPLETELY REWRITTEN
+
+
 # 1. Run ```tx0_to_txt_offset.py```
 
    - **Input**: `tx0_files` folder

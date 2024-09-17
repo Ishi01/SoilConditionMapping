@@ -328,10 +328,11 @@ def main():
 
     #clean up data used mid-processing
     #print(f"deleting generated data files")
-    #shutil.rmtree('output_txt_offset')
-    #print(f"deleting generated temperature file")
-    #os.remove("GeneratedTemp.txt")
-
+    shutil.rmtree('output_txt_offset')
+    #Delete the generated temperature file IF the user used it
+    if (user_choice == "2"):
+        os.remove("GeneratedTemp.txt")
+    
 
 #compiled dataprep script no longer necessary, just run the file and everything should run on its own
 if __name__ == "__main__":
