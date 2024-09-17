@@ -1,5 +1,7 @@
 import os
 import pandas as pd
+import tkinter as tk
+from tkinter import filedialog
 
 def extract_dates_from_filenames(data_dir):
     dates = []
@@ -22,16 +24,26 @@ def filter_temperature_data(temperature_file, dates, output_file):
     # Save the filtered temperature data
     filtered_df.to_csv(output_file, sep="\t", index=False)
 
-# Directory containing the txt files
-data_dir = "output_intermedia"
-# Path to the original temperature file
-temperature_file = "GNtemp.txt"
-# Path to save the filtered temperature data
-output_file = "Newtem.txt"
 
-# Extract dates from filenames
-dates = extract_dates_from_filenames(data_dir)
 
-# Filter temperature data and save it to a new file
-filter_temperature_data(temperature_file, dates, output_file)
+def main():
+    # Directory containing the txt files
+    data_dir = "output_txt_offset"
+
+    #Select the temperature
+
+    # Path to the original temperature file
+    current_folder = os.getcwd()
+    #temperature_file = "GNtemp.txt"
+    temp_msg = "Please select the temperature file"
+    temperature_file = filedialog.askopenfilename(initialdir=current_folder, title=temp_msg)
+    
+    # Path to save the filtered temperature data
+    output_file = "Newtem.txt"
+
+    # Extract dates from filenames
+    dates = extract_dates_from_filenames(data_dir)
+
+    # Filter temperature data and save it to a new file
+    filter_temperature_data(temperature_file, dates, output_file)
 
