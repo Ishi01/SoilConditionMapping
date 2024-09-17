@@ -1,6 +1,18 @@
 from lib.data_filter import extract_dates_from_filenames, filter_temperature_data
 import re
+'''
 
+    plot the temp and depth as requested
+
+    Parameters:
+        filename and time
+
+    Returns:
+        An image of the relationship between tempearture and depth
+   
+'''
+
+# Utility function 
 def extract_datetime_from_filename(filename):
     """
     Extracts the date and time from a filename using regex patterns.
