@@ -142,7 +142,7 @@ This formula accounts for the effect of temperature on resistivity, allowing the
 # Trouble Shooting
 
 ### Alternative Flow 1 Set System Environment Variables (If using Windows)
-If you're using an IDE that does not automatically integrate with Anaconda (such as PyCharm or others), you may need to manually configure your system environment variables:
+If you're using an IDE that does not automatically integrate with Anaconda (such as PyCharm or others), you may need to manually configure your system environment variables or using Anaconda Navigator to launch your IDEs:
 1. Open the System Properties:
 - Right-click on This PC or My Computer and select Properties.
 - Click on Advanced system settings.
