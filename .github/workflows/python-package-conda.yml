@@ -1,0 +1,49 @@
+name: Python Package using Conda
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest  # Using Ubuntu as an example
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+      max-parallel: 3
+
+    steps:
+    - uses: actions/checkout@v4  # Checkout the repository
+
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-activate-base: false  # Do not activate base environment
+
+    - name: Create Conda environment
+      run: conda env create --file environment.yml  # Create the Conda environment
+
+    - name: Create symbolic links for libraries (Linux and macOS)
+      if: runner.os != 'Windows'  # Only applicable on Linux and macOS
+      run: |
+        cd $CONDA_PREFIX/lib
+        ln -s libcholmod.so.3 libcholmod.so.5 || true
+        ln -s libumfpack.so.5 libumfpack.so.6 || true
+
+    - name: Verify Python version in Conda environment
+      run: conda run -n pg python --version  # Verify the Python version in the Conda environment
+
+    - name: Install flake8 in Conda environment
+      run: conda run -n pg conda install flake8  # Install flake8
+
+    - name: Lint with flake8
+      run: conda run -n pg flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: Test with pytest in Conda environment
+      run: |
+        conda run -n pg conda install pytest
+        conda run -n pg python -m pytest DataInversion/ERT_Main_test.py
