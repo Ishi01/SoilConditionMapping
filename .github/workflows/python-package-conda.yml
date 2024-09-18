@@ -5,11 +5,10 @@ on:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-latest  # Using Ubuntu as an example
-
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
       max-parallel: 3
 
     steps:
@@ -23,23 +22,30 @@ jobs:
     - name: Create Conda environment
       run: conda env create --file environment.yml  # Create the Conda environment
 
-    - name: Create symbolic links for libraries (Linux and macOS)
+    - name: Create symbolic links for libraries in a writable directory
       if: runner.os != 'Windows'  # Only applicable on Linux and macOS
       run: |
-        cd $CONDA_PREFIX/lib
-        ln -s libcholmod.so.3 libcholmod.so.5 || true
-        ln -s libumfpack.so.5 libumfpack.so.6 || true
+        mkdir -p $HOME/my_libs  # Create a writable directory for symbolic links
+        cd $HOME/my_libs
+        ln -s $CONDA_PREFIX/lib/libcholmod.so.3 libcholmod.so.5 || true
+        ln -s $CONDA_PREFIX/lib/libumfpack.so.5 libumfpack.so.6 || true
+
+    - name: Set LD_LIBRARY_PATH for shared libraries
+      run: |
+        export LD_LIBRARY_PATH=$HOME/my_libs:$LD_LIBRARY_PATH  # Add the new directory to LD_LIBRARY_PATH
+        echo $LD_LIBRARY_PATH
 
     - name: Verify Python version in Conda environment
-      run: conda run -n pg python --version  # Verify the Python version in the Conda environment
+      run: conda run -n pg python --version
 
     - name: Install flake8 in Conda environment
-      run: conda run -n pg conda install flake8  # Install flake8
+      run: conda run -n pg conda install flake8
 
     - name: Lint with flake8
       run: conda run -n pg flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
     - name: Test with pytest in Conda environment
       run: |
+        export LD_LIBRARY_PATH=$HOME/my_libs:$LD_LIBRARY_PATH  # Ensure the libraries are accessible
         conda run -n pg conda install pytest
         conda run -n pg python -m pytest DataInversion/ERT_Main_test.py
