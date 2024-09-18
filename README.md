@@ -11,7 +11,7 @@ This project is part of the **CITS5206** course and focuses on soil condition ma
 - **Libraries**: 
   - PyGIMLi 
   - PyQt5
-  - Imageio
+  - Pandas
   - Pip
   - Matplotlib
   - Numpy
