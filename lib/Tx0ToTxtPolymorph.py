@@ -77,7 +77,7 @@ class Tx0ToTxtConverter:
         """Formats the measurement data for writing, including x and z coordinates."""
         x = parts[18]
         z = parts[20]
-        return (a, b, m, n, rho, x, z)
+        return a, b, m, n, rho, x, z
 
     def format_corrected_data(self, a_new, b_new, m_new, n_new, rest_data):
         """Formats corrected data for output including x and z coordinates."""
@@ -110,7 +110,7 @@ class Tx0ToTxtConverter:
 class NoXZTx0ToTxtConverter(Tx0ToTxtConverter):
     def format_measurement_data(self, a, b, m, n, rho, parts):
         """Formats the measurement data without x and z coordinates."""
-        return (a, b, m, n, rho)
+        return a, b, m, n, rho
 
     def format_corrected_data(self, a_new, b_new, m_new, n_new, rest_data):
         """Formats corrected data for output without x and z coordinates."""
