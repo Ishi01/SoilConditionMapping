@@ -1,0 +1,14 @@
+name: pg
+channels:
+  - gimli
+  - conda-forge
+dependencies:
+  - python=3.9
+  - pygimli>=1.5.0
+  - pyqt
+  - pandas
+  - matplotlib
+  - numpy
+  - pytest
+  - suitesparse
+  - pip
