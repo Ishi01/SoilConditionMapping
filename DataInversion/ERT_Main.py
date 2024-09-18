@@ -1,10 +1,8 @@
 import glob
 import os
 
-import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import numpy as np
-import pybert as pb
 import pygimli as pg
 import pygimli.meshtools as mt
 from pygimli.physics import ert
