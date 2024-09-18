@@ -114,6 +114,21 @@ Follow the steps below to set up your environment and get started with the proje
 
 1.  Run main.py in the project using terminal or preset IDEs.
 
+## How to use
+- Run main.py with anaconda environment and all prerequisites installed.
+- This will navigate you to a UI, you can select files from the navigation or from the UI.
+- There are clear instructions in each tab.
+1. On Data Input page
+- Press start on Data Input page for data processing.
+- Open for opening designated file location, and the directory will be print inside the box once files are selected.
+- There are 2 kind of files need to be selected: ERT Raw file and Tempareture file.
+2. On Inversion page
+- Enter the input field for inversion output, press save to save the input and press reset for default input.
+- Press OK will navigate to a file selection dialog, select your input file (processed ERT file).
+- Your output will be displayed after processing
+3. On Water Content page 
+- Same as the Inversion with 2 extra input fields.
+
 # Trouble Shooting
 
 ### Alternative Flow 1 Set System Environment Variables (If using Windows)
