@@ -118,6 +118,7 @@ Follow the steps below to set up your environment and get started with the proje
 - Run main.py with anaconda environment and all prerequisites installed.
 - This will navigate you to a UI, you can select files from the navigation or from the UI.
 - There are clear instructions in each tab.
+![alt text](docs/screenshots/Overview_UI.png)
 1. On Data Input page
 - Press start on Data Input page for data processing.
 - Open for opening designated file location, and the directory will be print inside the box once files are selected.
@@ -126,8 +127,11 @@ Follow the steps below to set up your environment and get started with the proje
 - Enter the input field for inversion output, press save to save the input and press reset for default input.
 - Press OK will navigate to a file selection dialog, select your input file (processed ERT file).
 - Your output will be displayed after processing
+![alt text](docs/screenshots/Inversion_UI.png)
 3. On Water Content page 
 - Same as the Inversion with 2 extra input fields.
+- **Your inputs from inversion will be saved, write in the input fields if you want to use other parameters**
+![alt text](docs/screenshots/WaterContentUI.png)
 
 # Trouble Shooting
 
