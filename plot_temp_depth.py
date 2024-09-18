@@ -3,6 +3,10 @@ import re
 import pandas as pd
 from datetime import datetime
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 def extract_datetime_from_filename(filename):
     """
@@ -41,40 +45,6 @@ def extract_datetime_from_filename(filename):
 
     return None
 
-# 测试函数
-test_filenames = [
-    "2024-07-10_12-00-00.txt",
-    "2023-05-15_report.pdf",
-    "15_05_2023_data.csv",
-    "2022_12_31_summary.docx",
-    "nodate_file.txt"
-]
-
-for filename in test_filenames:
-    result = extract_datetime_from_filename(filename)
-    print(f"Filename: {filename}")
-    print(f"Result: {result}")
-    print()
-
-
-def extract_datetime_from_filename(filename):
-    """
-    Extracts the date and time from a filename using regex patterns.
-    
-    Parameters:
-        filename (str): The filename to extract the date and time from.
-    
-    Returns:
-        tuple or None: A tuple containing the extracted date in 'YYYY-MM-DD' format
-                        and time in 'HH:MM:SS' format, or None if not found.
-    """
-    match = re.search(r'(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})-(\d{2})', filename)
-    if match:
-        date = f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
-        time = f"{match.group(4)}:{match.group(5)}:{match.group(6)}"
-        return date, time
-    return None
-
 def extract_temperature_data(file_path, target_date, target_time):
     """
     Extract temperature data from GNtemp.txt file for the closest time to the specified date and time.
@@ -106,49 +76,46 @@ def extract_temperature_data(file_path, target_date, target_time):
 
 
 def plot_temp_depth(temp_data):
-    """
-    Plot the temperature vs depth data with depth from -0.5m to -4m.
-
-    Parameters:
-    temp_data (dict): Dictionary containing temperature data for different depths
-
-    Returns:
-    None (displays the plot)
-    """
-    sorted_data = sorted(temp_data.items(), key=lambda x: float(x[0]))
-    depths = [-float(depth) for depth, _ in sorted_data]
-    temperatures = [temp for _, temp in sorted_data]
-
-    plt.figure(figsize=(10, 8))
+    # Extract depths and temperatures
+    depths = [float(depth) for depth in temp_data.keys()]
+    temperatures = list(temp_data.values())
     
-    plt.plot(temperatures, depths, marker='o', linestyle='-', color='b', markersize=8)
+    # Sort the data by depth (from shallowest to deepest)
+    depths, temperatures = zip(*sorted(zip(depths, temperatures)))
     
-    plt.title('Temperature vs Depth', fontsize=16, pad=20)
-    plt.xlabel('Temperature (°C)', fontsize=12)
-    plt.ylabel('Depth (m)', fontsize=12)
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(temperatures, depths, marker='o')
     
-    plt.ylim(min(depths) - 0.5, max(depths) + 0.5)
-    plt.yticks(depths)
+    # Customize the plot
+    ax.set_title('Temperature vs Depth', fontsize=16)
+    ax.set_xlabel('Temperature (°C)', fontsize=12)
+    ax.set_ylabel('Depth (m)', fontsize=12)
+    ax.grid(True, linestyle='--', alpha=0.7)
     
-    plt.xlim(min(temperatures) - 1, max(temperatures) + 1)
+    # Set y-axis to increase downwards and start from 0
+    ax.set_ylim(min(depths) - 0.5, 0)  # Add some padding at the bottom
     
-    plt.grid(True, axis='y', linestyle='--', alpha=0.7)
+    # Move y-axis to the right side
+    ax.yaxis.tick_right()
+    ax.yaxis.set_label_position("right")
     
+    # Add temperature labels to each point
     for temp, depth in zip(temperatures, depths):
-        plt.annotate(f'{temp:.1f}°C', (temp, depth), xytext=(5, 5), 
-                     textcoords='offset points', fontsize=9,
-                     bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", alpha=0.8))
-
+        ax.annotate(f'{temp}°C', (temp, depth), textcoords="offset points", 
+                    xytext=(-10,0), ha='right', va='center', fontsize=9)
+    
+    # Show the plot
     plt.tight_layout()
-    
-    plt.savefig('temperature_vs_depth.png', dpi=300, bbox_inches='tight')
-    
     plt.show()
+
 # Main execution
 filename = '2024-07-10_12-00-00.tx0'
 file_path = 'Long_local/GNtemp.txt'
 
 datetime_result = extract_datetime_from_filename(filename)
+
+
 if datetime_result is None:
     print(f"Could not extract date and time from filename: {filename}")
 else:
@@ -160,7 +127,8 @@ else:
         print(f"Temperature data (closest to {target_date} {target_time}):")
         for depth, temp in temp_data.items():
             print(f"Depth {depth} m: {temp}°C")
-        
+        print(temp_data)
+
         plot_temp_depth(temp_data)
     except Exception as e:
         print(f"An error occurred: {e}")
