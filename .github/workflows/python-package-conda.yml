@@ -1,7 +1,14 @@
 name: Python Package using Conda
 
 on:
-  [push]
+  push:
+    branches:
+      - dev
+      - main
+    pull_request:
+      branches:
+        - dev
+        - main
 
 jobs:
   build-linux:
@@ -26,4 +33,4 @@ jobs:
       run: conda run -n pg python --version
 
     - name: Test with pytest in Conda environment
-      run: conda run -n pg python DataInversion/ERT_Main.py
+      run: conda run -n pg python data_inversion/ERT_Main.py
