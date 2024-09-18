@@ -97,9 +97,10 @@ def plot_temp_depth(temp_data):
     ax.set_ylim(min(depths) - 0.5, 0)  # Add some padding at the bottom
     
     # Move y-axis to the right side
-    ax.yaxis.tick_right()
-    ax.yaxis.set_label_position("right")
-    
+    # ax.yaxis.tick_right()
+    # ax.yaxis.set_label_position("right")
+    ax.xaxis.tick_top()
+    ax.xaxis.set_label_position('top')
     # Add temperature labels to each point
     for temp, depth in zip(temperatures, depths):
         ax.annotate(f'{temp}°C', (temp, depth), textcoords="offset points", 
@@ -114,8 +115,11 @@ filename = '2024-07-10_12-00-00.tx0'
 file_path = 'Long_local/GNtemp.txt'
 
 datetime_result = extract_datetime_from_filename(filename)
+target_date, target_time = datetime_result
+temp_data = extract_temperature_data(file_path, target_date, target_time)
+plot_temp_depth(temp_data)
 
-
+'''
 if datetime_result is None:
     print(f"Could not extract date and time from filename: {filename}")
 else:
@@ -133,3 +137,4 @@ else:
     except Exception as e:
         print(f"An error occurred: {e}")
         print("Please check the file structure and ensure it matches the expected format.")
+'''
