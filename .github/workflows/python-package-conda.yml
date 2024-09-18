@@ -48,4 +48,4 @@ jobs:
       run: |
         export LD_LIBRARY_PATH=$HOME/my_libs:$LD_LIBRARY_PATH  # Ensure the libraries are accessible
         conda run -n pg conda install pytest
-        conda run -n pg python -m pytest DataInversion/ERT_Main_test.py
+        conda run -n pg python -m pytest DataInversion/ERT_Main.py
