@@ -1,5 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5 import QtWidgets
 from UI import Ui_MainWindow
 from ui_logic import setup_ui_logic
 
