@@ -26,4 +26,4 @@ jobs:
       run: conda run -n pg python --version
 
     - name: Test with pytest in Conda environment
-      run: conda run -n pg python -m pytest DataInversion/ERT_Main.py
+      run: conda run -n pg python -m DataInversion/ERT_Main.py
