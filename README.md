@@ -142,7 +142,8 @@ This formula accounts for the effect of temperature on resistivity, allowing the
 # Trouble Shooting
 
 ### Alternative Flow 1 Set System Environment Variables (If using Windows)
-If you're using an IDE that does not automatically integrate with Anaconda (such as PyCharm or others), you may need to manually configure your system environment variables or using Anaconda Navigator to launch your IDEs:
+If you're using an IDE that does not automatically integrate with Anaconda (such as PyCharm or others), you may need to manually configure your system environment variables or using **Anaconda Navigator** to launch your IDEs.  
+If you want to change system environment variables: 
 1. Open the System Properties:
 - Right-click on This PC or My Computer and select Properties.
 - Click on Advanced system settings.
@@ -163,5 +164,5 @@ If you're using an IDE that does not automatically integrate with Anaconda (such
 4. Choose the Anaconda environment pg from the list.
 
 # Credits
-This software is built on previous work from repository [Soil-Conditions](https://github.com/wintelestr/Soil-Conditions)
+This software is built on previous work from repository [Soil-Conditions](https://github.com/wintelestr/Soil-Conditions)  
 The solution to cross-platfrom is contributed by [pyGimli](https://github.com/gimli-org/gimli/issues/761)
