@@ -2,19 +2,24 @@
 
 ## Overview 
 
-This project is part of the **CITS5206** course and focuses on soil condition mapping using inversion techniques. The project utilizes the **PyGIMLi** library for geophysical inversion and **PyQt5** for the user interface. Please note that this project is designed to run exclusively on **Windows**.
+This project is part of the **CITS5206** course and focuses on soil condition mapping using inversion techniques. The project utilizes the **PyGIMLi** library for geophysical inversion and **PyQt5** for the user interface. The environment is managed with Conda to ensure cross-platform compatibility and automation via CI. Please note that this project is designed to run on **Windows** but also supports **macOS** and **Linux**.
 
 ## Prerequisites <!-- This is a subheading -->
 
-- **Operating System**: Windows 
+- **Operating System**:
+  - Windows (primary)
+  - macOS (optional)
+  = Linux (optional) 
 - **Python Distribution**: Anaconda3
-- **Libraries**: 
-  - PyGIMLi 
+- **Libraries**(handled via Conda environment): 
+  - Python 3.10
+  - PyGIMLi >= 1.5.0
+  - SuiteSparse = 5
   - PyQt5
   - Pandas
-  - Pip
   - Matplotlib
   - Numpy
+  - pytest
 
 ## Installation Instructions 
 
@@ -31,21 +36,34 @@ Follow the steps below to set up your environment and get started with the proje
 2. Create a new virtual environment named `pg` with the required libraries by executing the following command:
 
    ```bash
-   conda create -n pg -c gimli -c conda-forge pygimli=1.4.3
+   conda create -n pg -c gimli -c conda-forge python=3.10 pygimli>=1.5.0 suitesparse=5
+   ```
 3. Activate virtual environment using code below after successfully installed the virtual environment.
    
     ```bash
    conda activate pg
+    ```
 
 ### Step 3: Install libraries
 
-1. Install Imageio
+1. Install additional compulsory dependencies like **Pandas**, **Matplotlib**, **Numpy**, and optionally **pytest**:
     ```bash
-   pip install pandas
-   
+   conda install pandas matplotlib numpy pytest
+    ```
+2. Install PyQt5 if not included by default:
+   ```bash
+   conda install pyqt
+   ```
 ### Step 4: Run the Python script
 
 1.  Run main.py in the project using terminal or preset IDEs.
+
+### Step 5: Testing (Optional)
+
+To run automated tests with `pytest`:
+```bash
+pytest
+```
 
 ## How to use
 - Run main.py with anaconda environment and all prerequisites installed.
@@ -146,3 +164,4 @@ If you're using an IDE that does not automatically integrate with Anaconda (such
 
 # Credits
 This software is built on previous work from repository [Soil-Conditions](https://github.com/wintelestr/Soil-Conditions)
+The solution to cross-platfrom is contributed by [pyGimli](https://github.com/gimli-org/gimli/issues/761)
