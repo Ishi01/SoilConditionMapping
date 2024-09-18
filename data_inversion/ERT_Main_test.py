@@ -1,6 +1,6 @@
 import os
 import pytest
-from ERT_Main import  startInversion, cleanup_temp_files, create_mesh
+from ERT_Main import startInversion, cleanup_temp_files, create_mesh
 
 
 

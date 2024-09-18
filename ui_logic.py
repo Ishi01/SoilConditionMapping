@@ -9,7 +9,7 @@ import tempfile
 import subprocess
 import platform
 from data_inversion.ERT_Main import startInversion
-from WaterContent.Water_Content_Main import watercomputing
+from WaterContent.Water_Content_Main import water_computing
 
 # global var
 global_tx0_input_folder = None
@@ -222,7 +222,6 @@ def start_inversion_with_parameters(ui):
             ui.labelDepthImage.setScaledContents(True)
             ui.labelDepthImage.setAlignment(QtCore.Qt.AlignCenter)
             print(f"Depth image displayed: {output_image_path}")
-            # 切换到显示结果的页面
             ui.stackedWidget.setCurrentWidget(ui.page_2)
         else:
             print("Output image file not found.")
@@ -259,7 +258,7 @@ def start_water_computation_with_parameters(ui):
         return
 
     try:
-        image_path = watercomputing(
+        image_path = water_computing(
             [start_x, start_z], [end_x, end_z], quality, area, lambda_value,
             max_iterations, dphi, A, B, processed_file_path
         )
@@ -270,7 +269,6 @@ def start_water_computation_with_parameters(ui):
             ui.labelSWC.setScaledContents(True)
             ui.labelSWC.setAlignment(QtCore.Qt.AlignCenter)
             print(f"Image displayed on labelSWC: {image_path}")
-            # 切换到显示结果的页面
             ui.stackedWidget_2.setCurrentWidget(ui.page_3)
         else:
             print("Image path is invalid or file does not exist.")

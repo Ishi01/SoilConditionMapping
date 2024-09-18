@@ -6,6 +6,7 @@ import pygimli as pg
 import pygimli.meshtools as mt
 from pygimli.physics import ert
 
+
 # Ensure output folder exists
 def ensure_output_folder():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,6 +14,7 @@ def ensure_output_folder():
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     return output_dir
+
 
 # Cleanup temporary files
 def cleanup_temp_files():
@@ -27,27 +29,33 @@ def cleanup_temp_files():
                 print(f"Removed: {file}")
             except Exception as e:
                 print(f"Error removing {file}: {e}")
-                
+
+
 # Create mesh               
 def create_mesh(start=[0, 0],
-    end=[47, -8],
-    quality=33.5,
-    area=0.5,):
-     # Create Geometry and Mesh
+                end=[47, -8],
+                quality=33.5,
+                area=0.5, ):
+    # Create Geometry and Mesh
     geom = mt.createWorld(start=start, end=end, worldMarker=False)
     mesh = mt.createMesh(geom, quality=quality, area=area, smooth=True)
     mesh.save("mesh.bms")
     return mesh
 
+
 # Compute water content
-def watercomputing(start=[0, 0], end=[47, -8], quality=33.5, area=0.5,
-                   lam=10, maxIter=6, dPhi=2, A=246.47, B=-0.627):
+def water_computing(start=[0, 0], end=[47, -8], quality=33.5, area=0.5,
+                   lam=10, maxIter=6, dPhi=2, A=246.47, B=-0.627, processed_file_path=None):
     """ERT Inversion and Visualization process"""
-    
+
     output_folder = ensure_output_folder()
 
-    raw_data_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Raw")
-    entries_sel = [file for file in os.listdir(raw_data_folder) if file.endswith(".txt")]
+    # raw_data_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Raw")
+    # entries_sel = [file for file in os.listdir(raw_data_folder) if file.endswith(".txt")]
+
+    file_to_process = processed_file_path
+
+    entries_sel = [file_to_process]
 
     mesh = create_mesh(start=start, end=end, quality=quality, area=area)
 
@@ -57,20 +65,20 @@ def watercomputing(start=[0, 0], end=[47, -8], quality=33.5, area=0.5,
     Storage = np.zeros([np.shape(mesh.cellMarkers())[0], len(entries_sel)])
 
     for i, date in enumerate(entries_sel):
-        mgr = ert.ERTManager(os.path.join(raw_data_folder, date), verbose=True, debug=True)
+        mgr = ert.ERTManager(file_to_process, verbose=True, debug=True)
         mgr.data.remove(mgr.data["rhoa"] < 0)  # Filter negative values
         mgr.data["err"] = ert.estimateError(mgr.data, absoluteError=0.001, relativeError=0.03)
         mgr.data["k"] = ert.createGeometricFactors(mgr.data, numerical=True)
-        
+
         inv = mgr.invert(mesh=mesh, lam=lam, maxIter=maxIter, dPhi=dPhi, CHI1OPT=5, Verbose=True)
         Storage[:, i] = inv
 
         mgr.saveResult(os.path.join(output_folder, f"{date[:-4]}_result.dat"))
 
-        fSWC = lambda x: A * x**B
+        fSWC = lambda x: A * x ** B
         temperature_points = [(0, -5), (-10, -5)]
         T = 25.5
-        
+
         temperature_points.sort(key=lambda x: x[0])
         for j in range(len(y_coordinates) - 1):
             y = y_coordinates[j]
@@ -95,17 +103,21 @@ def watercomputing(start=[0, 0], end=[47, -8], quality=33.5, area=0.5,
         ax1.set_xlim(-0, mgr.paraDomain.xmax())
         ax1.set_ylim(-8, mgr.paraDomain.ymax())
         ax1.set_title(date)
-       
+
         fig_filename = os.path.join(
-        output_folder, f"Water_result_{os.path.splitext(date)[0]}.png"
+            output_folder, f"Water_result_{os.path.basename(os.path.splitext(date)[0])}.png"
         )
         plt.savefig(fig_filename, dpi=300, bbox_inches="tight")
         print(f"Figure saved as: {fig_filename}")
-        
-        
-        plt.close()
-        plt.close("all") 
 
-if __name__ == "__main__":
-    watercomputing()
-    cleanup_temp_files()
+        plt.close()
+        plt.close("all")
+
+        cleanup_temp_files()
+
+    return fig_filename
+
+
+# if __name__ == "__main__":
+#     watercomputing()
+#     cleanup_temp_files()
