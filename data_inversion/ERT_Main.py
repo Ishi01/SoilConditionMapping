@@ -45,7 +45,7 @@ def cleanup_temp_files():
 
 
 def create_mesh(start=[0, 0], end=[47, -8], quality=33.5, area=0.5):
-    # Create Geometry and Mesh
+     # Create Geometry and Mesh
     geom = mt.createWorld(start=start, end=end, worldMarker=False)
     mesh = mt.createMesh(geom, quality=quality, area=area, smooth=True)
     mesh.save("mesh.bms")
@@ -65,9 +65,9 @@ def startInversion(start, end, quality, area, inversion_params, file_path, zWeig
 
     output_dir = ensure_output_folder()
 
-    # Load the data file (processed file selected in the UI)
+    # Load the data file, the first file under /Raw
     try:
-        file_to_convert = file_path  # Use the passed processed file path
+        file_to_convert = file_path
     except FileNotFoundError as e:
         pg.error(str(e))
         return
@@ -83,18 +83,20 @@ def startInversion(start, end, quality, area, inversion_params, file_path, zWeig
     pg.info("Filtered rhoa (min/max)", min(mgr.data["rhoa"]), max(mgr.data["rhoa"]))
     Accur = (1 - np.shape(Argw)[0] / np.shape(rhoa)[0]) * 100
 
-    # Data processing: Filter negative values
+    # Data processing Filter negative value
     mgr.data.remove(mgr.data["rhoa"] < 0)
 
-    # Add estimated error and geometrical factor
+    # Add estimated Error and geometrical factor
     mgr.data["err"] = ert.estimateError(
         mgr.data, absoluteError=0.001, relativeError=0.03
     )
     pg.info("Filtered rhoa (min/max)", min(mgr.data["rhoa"]), max(mgr.data["rhoa"]))
     mgr.data["k"] = ert.createGeometricFactors(mgr.data, numerical=True)
+    # ert.show(mgr.data)
 
-    # Inversion process
-    tolerance = 1  # Abort criterion for chi2
+    # Inversion here
+    tolerance = 1  # Abort criterion for chi2 (chi-squared) for an inversion process.
+    # Chi-squared represents the goodness of fit between the model and the observed data.
     for iteration in range(maxIter):
         inv = mgr.invert(
             mesh=mesh, zWeight=zWeight, lam=lam, maxIter=1, dPhi=dPhi, CHI1OPT=5, Verbose=True
@@ -129,7 +131,7 @@ def startInversion(start, end, quality, area, inversion_params, file_path, zWeig
     plt.savefig(fig_filename, dpi=300, bbox_inches="tight")
     print(f"Figure saved as: {fig_filename}")
 
-    plt.close(fig1)
+    plt.close(fig1)  
     plt.close("all")
 
     cleanup_temp_files()
