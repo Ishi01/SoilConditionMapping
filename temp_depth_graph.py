@@ -43,3 +43,23 @@ def extract_datetime_from_filename(filename):
                     return f"{groups[0]}-{groups[1]}-{groups[2]}", None
     
     return None
+    
+
+
+def extract_temperature_data(file_path, target_date, target_time):
+    
+    df = pd.read_csv(file_path, sep='\t')
+    print("Columns in the file:", df.columns.tolist())
+    
+    datetime_col = df.columns[0]
+    df['datetime'] = pd.to_datetime(df[datetime_col], format='%d/%m/%Y %I:%M:%S %p', errors='coerce')
+    
+    target_datetime = f"{target_date} {target_time}"
+    target_dt = datetime.strptime(target_datetime, '%Y-%m-%d %H:%M:%S')
+    
+    closest_time = df.iloc[(df['datetime'] - target_dt).abs().argsort()[:1]].index[0]
+    
+    depth_columns = ['-4', '-3.5', '-3', '-1.5', '-1', '-0.5']
+    temp_data = df.loc[closest_time, depth_columns].to_dict()
+    
+    return temp_data
