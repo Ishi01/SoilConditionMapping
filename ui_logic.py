@@ -254,6 +254,35 @@ def start_inversion_with_parameters(ui):
     else:
         print("No processed file selected. Please select a file first.")
 
+def run_inversion_and_display_output(ui, start_coords, end_coords, quality, area, inversion_params, file_path):
+    """
+    Run the inversion process and display the output image in the UI.
+    
+    Parameters:
+        ui: Instance of Ui_MainWindow.
+        start_coords: Start coordinates for inversion.
+        end_coords: End coordinates for inversion.
+        quality: Quality parameter.
+        area: Area parameter.
+        inversion_params: Inversion parameters such as lambda, max_iterations, dphi, etc.
+        file_path: The path to the processed data file.
+    """
+    try:
+        # Call the startInversion function and capture the output image path
+        output_image_path = startInversion(start_coords, end_coords, quality, area, inversion_params, file_path)
+
+        # Once inversion is done, update the UI with the output image
+        if os.path.exists(output_image_path):
+            pixmap = QPixmap(output_image_path)
+            ui.labelDepthImage.setPixmap(pixmap)
+            ui.labelDepthImage.setScaledContents(True)
+            ui.labelDepthImage.setAlignment(QtCore.Qt.AlignCenter)
+            print(f"Depth image displayed: {output_image_path}")
+        else:
+            print("Output image file not found.")
+
+    except Exception as e:
+        print(f"Error during inversion: {e}")
 
 def run_inversion_and_display_output(ui, start_coords, end_coords, quality, area, inversion_params, file_path):
     """
