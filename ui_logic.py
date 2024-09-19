@@ -8,7 +8,7 @@ from data_processor import convert_tx0_to_txt, filter_temperature_data_by_date, 
 import tempfile
 import subprocess
 import platform
-from data_inversion.ERT_Main import startInversion
+from DataInversion.ERT_Main import startInversion
 from WaterContent.Water_Content_Main import water_computing
 
 # global var
