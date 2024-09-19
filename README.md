@@ -86,7 +86,7 @@ pytest
 
 # Data Processing Workflow for tx0_to_txt_temp Pipeline
 
-# 1. Run ```tx0_to_txt_offset.py```
+## 1. Run ```tx0_to_txt_offset.py```
 
    - **Input**: `tx0_files` folder
    - **Output**: `output_txt_offset` folder
@@ -96,7 +96,7 @@ python tx0_to_txt_offset.py tx0_files/ output_txt_offset/
 
 ```
 
-# 2. Run ```Newtem.py```
+## 2. Run ```Newtem.py```
 
 
    - **Input**: `output_txt_offset` folder and `GNtemp.txt` file
@@ -108,7 +108,7 @@ python Newtem.py output_txt_offset/ GNtemp.txt
 ```
 
 
-# 3. Run ```txt_temp.py```
+## 3. Run ```txt_temp.py```
 
    - **Input**: `output_txt_offset` folder and `Newtem.txt` file
    - **Output**: `tx0_to_txt_temp` folder
@@ -117,7 +117,7 @@ python Newtem.py output_txt_offset/ GNtemp.txt
 python txt_temp.py Newtem.txt output_txt_offset/ 
 ```
 
-# 4. Run ```auto_tx0_txt_temp.py``` to automate the above process.
+## 4. Run ```auto_tx0_txt_temp.py``` to automate the above process.
 
    - **Input**: `tx0_files` folder and  `GNtemp.txt` file
    - **Output**: `tx0_to_txt_temp` folder
@@ -125,19 +125,50 @@ python txt_temp.py Newtem.txt output_txt_offset/
 ```python
 python auto_tx0_txt_temp.py
 ```
-
+## 5. Math formula 
 This formula can be expressed mathematically as:
 ρ_corrected = ρ_measured * [1 + α(T - T_ref)]
 Where:
-ρ_corrected is the corrected resistivity
-ρ_measured is the measured resistivity
-α is the temperature coefficient (0.025 /°C in this formula)
-T is the actual temperature
-T_ref is the reference temperature (25°C in this formula)
-The specific formula used in the code is:
+ρ_corrected is the **corrected resistivity**
+ρ_measured is the **measured resistivity**
+α is the temperature **coefficient** (0.025 /°C in this formula)
+T is the **actual** temperature
+T_ref is the `reference` temperature (25°C in this formula)
+The specific `formula` used in the code is:
 ρ_corrected = ρ_measured * [1 + 0.025(T - 25)]
 
 This formula accounts for the effect of temperature on resistivity, allowing the measured resistivity to be corrected to a standard temperature (25°C in this case). The temperature coefficient of 0.025 /°C indicates that for every 1°C deviation from the reference temperature, the resistivity changes by 2.5%.
+
+# Temperature vs Depth Visualization 
+
+This Python tool processes temperature data from `.tx0` files based on specific date and time extracted from the filename. It then visualizes the temperature at various depths using a customized plot.
+
+## Table of Contents
+
+1. [Description](#description)
+2. [Installation](#installation)
+
+
+## Description
+
+This tool extracts temperature data from a `.tx0` file (`GNtemp.txt`) for a specific date and time based on filenames that include date and time in various formats. It allows users to visualize the temperature variation with depth using a well-formatted plot.
+
+### Input:
+- Filenames containing date and time (formats: `YYYY-MM-DD_HH-MM-SS`, `YYYY-MM-DD`, `DD_MM_YYYY`, or `YYYY_MM_DD`).
+- Temperature data stored in a `.txt` file (`GNtemp.txt`), where each row represents temperature readings at different depths and times.
+
+### Output:
+- A plot showing the relationship between temperature and depth for a given date and time.
+
+## Installation
+
+Make sure you have Python and the necessary libraries installed:
+
+```bash
+pip install pandas matplotlib
+```
+
+
 
 # Trouble Shooting
 
