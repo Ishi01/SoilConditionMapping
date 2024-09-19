@@ -73,3 +73,61 @@ def extract_temperature_data(file_path, target_date, target_time):
     temp_data = df.loc[closest_time, depth_columns].to_dict()
     
     return temp_data
+
+
+
+def create_temp_vs_depth_plot(temp_data):
+    """
+    Create a temperature vs depth plot based on the provided temperature data.
+
+    Parameters:
+    temp_data (dict): Dictionary containing temperature data for different depths
+
+    Returns:
+    str: Base64 encoded string of the plot image
+    """
+    depths = [float(depth) for depth in temp_data.keys()]
+    temperatures = list(temp_data.values())
+    
+    depths, temperatures = zip(*sorted(zip(depths, temperatures)))
+    
+    fig, ax = plt.subplots(figsize=(12, 8))
+    ax.set_facecolor('#F5F5F5')
+    fig.patch.set_facecolor('#FFFFFF')
+    
+    line_color = '#007ACC'
+    ax.plot(temperatures, depths, marker='o', color=line_color, linewidth=2, markersize=8)
+    
+    ax.set_title('Temperature vs Depth', fontsize=20, fontweight='bold', pad=20)
+    ax.set_xlabel('Temperature (°C)', fontsize=14, fontweight='bold')
+    ax.set_ylabel('Depth (m)', fontsize=14, fontweight='bold')
+    
+    ax.grid(True, linestyle='--', alpha=0.7, color='#CCCCCC')
+    
+    y_min = min(depths) - 0.5
+    ax.set_ylim(y_min, 0)
+    
+    ax.xaxis.tick_top()
+    ax.xaxis.set_label_position('top')
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    
+    for temp, depth in zip(temperatures, depths):
+        ax.annotate(f'{temp}°C', (temp, depth), 
+                    textcoords="offset points",
+                    xytext=(10, 0), 
+                    ha='left', va='center',
+                    fontsize=10,
+                    bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", alpha=0.8))
+    
+    top_temp = temp_data[max(temp_data.keys())]
+    bottom_temp = temp_data[min(temp_data.keys())]
+    ax.plot([top_temp, top_temp], [float(max(temp_data.keys())), float(max(temp_data.keys())) - 0.5], color=line_color, linewidth=2)
+    ax.plot([bottom_temp, bottom_temp], [float(min(temp_data.keys())), float(min(temp_data.keys())) + 0.5], color=line_color, linewidth=2)
+    
+    plt.tight_layout()
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+    plt.close(fig)
+    return image_base64
