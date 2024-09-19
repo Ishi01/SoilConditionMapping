@@ -131,3 +131,46 @@ def create_temp_vs_depth_plot(temp_data):
     image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
     plt.close(fig)
     return image_base64
+
+
+def display_temp_vs_depth(txo_file, GNtemp_file):
+    """
+    Analyze temperature data from txo and GNtemp files and return a plot.
+    
+    Parameters:
+    txo_file (str): Path to the .tx0 file
+    GNtemp_file (str): Path to the GNtemp.txt file
+    
+    Returns:
+    str or None: Base64 encoded string of the temperature vs depth plot, or None if an error occurred
+    
+    Usage:
+    plot_image = display_temp_vs_depth('2021-11-12_03-30-00.tx0', 'Long_local/GNtemp.txt')
+    if plot_image:
+        # Use plot_image (base64 string) to display the image
+        print("Plot generated successfully")
+    else:
+        print("Failed to generate plot")
+    """
+    try:
+        datetime_result = extract_datetime_from_filename(txo_file)
+        if datetime_result is None:
+            print("Error: Failed to extract date and time from filename")
+            return None
+        
+        target_date, target_time = datetime_result
+        if target_time is None:
+            target_time = "00:00:00"  # Default time if not provided
+        
+        temp_data = extract_temperature_data(GNtemp_file, target_date, target_time)
+        
+        if not temp_data:
+            print("Error: Failed to extract temperature data")
+            return None
+        
+        plot_image = create_temp_vs_depth_plot(temp_data)
+        
+        return plot_image
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return None
