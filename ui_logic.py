@@ -24,17 +24,25 @@ def setup_ui_logic(ui, MainWindow):
     ui.pushButtonBrowserFiles.clicked.connect(lambda: open_file_browser(ui.textEditProcessedTxtPreview, tx0=True))
     ui.pushButtonBrowserTempFiles.clicked.connect(lambda: open_file_browser(ui.textEditProcessedTempPreview, tx0=False))
     ui.pushButtonStartDataProcessing.clicked.connect(lambda: start_data_processing(ui))
+    
+    # Bind OK button to start the inversion with parameters
     ui.buttonBoxResetConfirmSave.accepted.connect(lambda: start_inversion_with_parameters(ui))
     ui.buttonBoxResetConfirmSave_2.accepted.connect(lambda: start_water_computation_with_parameters(ui))
+    
+    # Bind exit action to close the application
     ui.actionExit.triggered.connect(lambda: exit_application(MainWindow))
+    
+    # Open directories when buttons are clicked
     ui.pushButtonOpenTx0Dir.clicked.connect(lambda: open_directory(global_tx0_input_folder))
     ui.pushButtonTempDir.clicked.connect(lambda: open_directory(global_selected_temperature_file))
+    
+    # Bind Reset buttons to reset all fields (corrected: only resets fields, does not trigger saving)
     ui.buttonBoxResetConfirmSave.button(QDialogButtonBox.Reset).clicked.connect(lambda: reset_all_fields(ui))
     ui.buttonBoxResetConfirmSave_2.button(QDialogButtonBox.Reset).clicked.connect(lambda: reset_all_fields(ui))
-    ui.buttonBoxResetConfirmSave.button(QDialogButtonBox.Reset).clicked.connect(
-        lambda: save_output_file(ui, MainWindow))
-    ui.buttonBoxResetConfirmSave_2.button(QDialogButtonBox.Reset).clicked.connect(
-        lambda: save_output_file(ui, MainWindow))
+    
+    # Bind Save buttons to save the output (corrected: Save buttons trigger saving)
+    ui.buttonBoxResetConfirmSave.button(QDialogButtonBox.Save).clicked.connect(lambda: save_output_file(ui, MainWindow))
+    ui.buttonBoxResetConfirmSave_2.button(QDialogButtonBox.Save).clicked.connect(lambda: save_output_file(ui, MainWindow))
 
 
 def open_file_browser(text_edit, tx0=True):
@@ -126,24 +134,41 @@ def exit_application(MainWindow):
 
 def reset_all_fields(ui):
     """
-    Reset all input fields in the UI to their default values.
+    Reset all input fields in the UI to their default values or empty values.
     """
-    # Reset geometry and inversion parameters
-    ui.startXLineEdit.setText("0")
-    ui.startZLineEdit.setText("0")
-    ui.endXLineEdit.setText("47")
-    ui.endZLineEdit.setText("-8")
-    ui.qualityLineEdit.setText("33.5")
-    ui.horizontalSlider.setValue(33)
-    ui.areaLineEdit.setText("0.5")
-    ui.LambdaLineEdit.setText("0.1")
-    ui.IterationLineEdit.setText("10")
-    ui.dPhiLineEdit.setText("0.01")
-    ui.checkBox.setChecked(False)
+    try:
+        # Set all LineEdits to 0 or clear them
+        ui.startXLineEdit.setText("0")
+        ui.startZLineEdit.setText("0")
+        ui.endXLineEdit.setText("0")
+        ui.endZLineEdit.setText("0")
+        ui.qualityLineEdit.setText("0")
+        ui.areaLineEdit.setText("0")
+        ui.LambdaLineEdit.setText("0")
+        ui.IterationLineEdit.setText("0")
+        ui.dPhiLineEdit.setText("0")
+        ui.checkBox.setChecked(False)
 
-    # Clear text edits for file paths
-    ui.textEditProcessedTxtPreview.clear()
-    ui.textEditProcessedTempPreview.clear()
+        # Water Content Page Field Reset
+        ui.startXLineEdit_WC.setText("0")
+        ui.startZLineEdit_WC.setText("0")
+        ui.endXLineEdit_WC.setText("0")
+        ui.endZLineEdit_WC.setText("0")
+        ui.qualityLineEdit_WC.setText("0")
+        ui.areaLineEdit_WC.setText("0")
+        ui.LambdaLineEdit_WC.setText("0")
+        ui.IterationLineEdit_WC.setText("0")
+        ui.dPhiLineEdit_WC.setText("0")
+        ui.ALineEdit.setText("0")
+        ui.BLineEdit.setText("0")
+
+        # Clear the file path text box
+        ui.textEditProcessedTxtPreview.clear()
+        ui.textEditProcessedTempPreview.clear()
+
+        print("All fields have been reset.")
+    except Exception as e:
+        print(f"Error during reset: {e}")
 
 
 def open_directory(directory):
