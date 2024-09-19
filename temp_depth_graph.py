@@ -5,6 +5,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import io
 import base64
+##########################################
+##  INPUT Parameter:
+##  txo_file = '2021-11-12_03-30-00.tx0'
+##  GNtemp_file = 'path-to/GNtemp.txt'
+##  
+##   Fore Front END:
+##       
+##       plot_image = display_temp_vs_depth('2021-11-12_03-30-00.tx0', 'Long_local/GNtemp.txt')
+##
+##########################################
 
 def extract_datetime_from_filename(filename):
     """
@@ -43,8 +53,6 @@ def extract_datetime_from_filename(filename):
                     return f"{groups[0]}-{groups[1]}-{groups[2]}", None
     
     return None
-    
-
 
 def extract_temperature_data(file_path, target_date, target_time):
     """
@@ -73,8 +81,6 @@ def extract_temperature_data(file_path, target_date, target_time):
     temp_data = df.loc[closest_time, depth_columns].to_dict()
     
     return temp_data
-
-
 
 def create_temp_vs_depth_plot(temp_data):
     """
@@ -132,7 +138,6 @@ def create_temp_vs_depth_plot(temp_data):
     plt.close(fig)
     return image_base64
 
-
 def display_temp_vs_depth(txo_file, GNtemp_file):
     """
     Analyze temperature data from txo and GNtemp files and return a plot.
@@ -174,3 +179,10 @@ def display_temp_vs_depth(txo_file, GNtemp_file):
     except Exception as e:
         print(f"Error: {str(e)}")
         return None
+
+# Example usage
+# plot_image = display_temp_vs_depth('2021-11-12_03-30-00.tx0', 'Long_local/GNtemp.txt')
+# if plot_image:
+#     print("Plot generated successfully")
+# else:
+#     print("Failed to generate plot")
