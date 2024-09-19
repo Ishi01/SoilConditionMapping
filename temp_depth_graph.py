@@ -47,7 +47,17 @@ def extract_datetime_from_filename(filename):
 
 
 def extract_temperature_data(file_path, target_date, target_time):
-    
+    """
+    Extract temperature data from GNtemp.txt file for the closest time to the specified date and time.
+
+    Parameters:
+    file_path (str): Path to the GNtemp.txt file
+    target_date (str): Target date in 'YYYY-MM-DD' format
+    target_time (str): Target time in 'HH:MM:SS' format
+
+    Returns:
+    dict: Dictionary containing temperature data for different depths
+    """
     df = pd.read_csv(file_path, sep='\t')
     print("Columns in the file:", df.columns.tolist())
     
