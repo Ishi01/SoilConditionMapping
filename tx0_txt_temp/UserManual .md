@@ -1,13 +1,13 @@
 # User Manual
 
-`**For our client and team member**`
+**For our client and team member to `better under` this block:**
 
-## Data Processing Workflow for tx0_to_txt_temp Pipeline
+## `Data Processing` Workflow for tx0_to_txt_temp Pipeline
 
 <img src="images/predata.png" alt="Data Preprocessing Workflow" width="500"/>
 
 
-### 1. Run ```tx0_to_txt_offset.py```
+### Step 1. Run ```tx0_to_txt_offset.py```
 
    - **Input**: `tx0_files` folder
    - **Output**: `output_txt_offset` folder
@@ -17,7 +17,7 @@ python tx0_to_txt_offset.py tx0_files/ output_txt_offset/
 
 ```
 
-### 2. Run ```Newtem.py```
+### Step 2. Run ```Newtem.py```
 
 
    - **Input**: `output_txt_offset` folder and `GNtemp.txt` file
@@ -29,7 +29,7 @@ python Newtem.py output_txt_offset/ GNtemp.txt
 ```
 
 
-### 3. Run ```txt_temp.py```
+### Step 3. Run ```txt_temp.py```
 
    - **Input**: `output_txt_offset` folder and `Newtem.txt` file
    - **Output**: `tx0_to_txt_temp` folder
@@ -38,7 +38,7 @@ python Newtem.py output_txt_offset/ GNtemp.txt
 python txt_temp.py Newtem.txt output_txt_offset/ 
 ```
 
-### 4. Run ```auto_tx0_txt_temp.py``` to automate the above process.
+### Step 4. Run ```auto_tx0_txt_temp.py``` to automate the above process.
 
    - **Input**: `tx0_files` folder and  `GNtemp.txt` file
    - **Output**: `tx0_to_txt_temp` folder
@@ -47,9 +47,8 @@ python txt_temp.py Newtem.txt output_txt_offset/
 python auto_tx0_txt_temp.py
 ```
 
-# 5. Math formula 
-This formula can be expressed mathematically as:
-ρ_corrected = ρ_measured * [1 + α(T - T_ref)]
+## Note: Math formula 
+**ρ_corrected = ρ_measured * [1 + α(T - T_ref)]**
 Where:
 ρ_corrected is the **corrected resistivity**
 ρ_measured is the **measured resistivity**
