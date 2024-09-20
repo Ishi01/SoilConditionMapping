@@ -162,6 +162,7 @@ The specific formula used in the code is:<br />
 ρ_corrected = ρ_measured * [1 + 0.025(T - 25)]<br />
 
 
+
 This formula accounts for the effect of temperature on resistivity, allowing the measured resistivity to be corrected to a standard temperature (25°C in this case). The temperature coefficient of 0.025 /°C indicates that for every 1°C deviation from the reference temperature, the resistivity changes by 2.5%.
 
 # Temperature vs Depth Visualization 
