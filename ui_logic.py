@@ -24,25 +24,26 @@ def setup_ui_logic(ui, MainWindow):
     ui.pushButtonBrowserFiles.clicked.connect(lambda: open_file_browser(ui.textEditProcessedTxtPreview, tx0=True))
     ui.pushButtonBrowserTempFiles.clicked.connect(lambda: open_file_browser(ui.textEditProcessedTempPreview, tx0=False))
     ui.pushButtonStartDataProcessing.clicked.connect(lambda: start_data_processing(ui))
-    
+
     # Bind OK button to start the inversion with parameters
     ui.buttonBoxResetConfirmSave.accepted.connect(lambda: start_inversion_with_parameters(ui))
     ui.buttonBoxResetConfirmSave_2.accepted.connect(lambda: start_water_computation_with_parameters(ui))
-    
+
     # Bind exit action to close the application
     ui.actionExit.triggered.connect(lambda: exit_application(MainWindow))
-    
+
     # Open directories when buttons are clicked
     ui.pushButtonOpenTx0Dir.clicked.connect(lambda: open_directory(global_tx0_input_folder))
     ui.pushButtonTempDir.clicked.connect(lambda: open_directory(global_selected_temperature_file))
-    
+
     # Bind Reset buttons to reset all fields (corrected: only resets fields, does not trigger saving)
     ui.buttonBoxResetConfirmSave.button(QDialogButtonBox.Reset).clicked.connect(lambda: reset_all_fields(ui))
     ui.buttonBoxResetConfirmSave_2.button(QDialogButtonBox.Reset).clicked.connect(lambda: reset_all_fields(ui))
-    
+
     # Bind Save buttons to save the output (corrected: Save buttons trigger saving)
     ui.buttonBoxResetConfirmSave.button(QDialogButtonBox.Save).clicked.connect(lambda: save_output_file(ui, MainWindow))
-    ui.buttonBoxResetConfirmSave_2.button(QDialogButtonBox.Save).clicked.connect(lambda: save_output_file(ui, MainWindow))
+    ui.buttonBoxResetConfirmSave_2.button(QDialogButtonBox.Save).clicked.connect(
+        lambda: save_output_file(ui, MainWindow))
 
 
 def open_file_browser(text_edit, tx0=True):
@@ -80,6 +81,9 @@ def open_file_browser(text_edit, tx0=True):
 def start_data_processing(ui):
     """
     Logic to execute when the "Start" button is clicked.
+
+    Parameters:
+        ui: Instance of Ui_MainWindow.
     """
     global global_tx0_input_folder
     global global_selected_temperature_file
@@ -87,10 +91,12 @@ def start_data_processing(ui):
     # Get the converter option
     converter_choice = "1" if ui.XZcheckBox.isChecked() else "2"
 
+    # If the tx0 folder is not set, prompt the user to select it
     if not global_tx0_input_folder:
         print("Please use the 'Browser' button to select tx0 files first.")
         return
 
+    # If the temperature file is not set, prompt the user to select it
     if not global_selected_temperature_file:
         print("Please use the 'Browser' button to select the temperature file first.")
         return
@@ -117,12 +123,14 @@ def start_data_processing(ui):
     filter_temperature_data_by_date(txt_output_folder, global_selected_temperature_file, filtered_temp_output)
     print("Temperature data filtering completed.")
 
-    # Step 3: Calibrate resistivity
+    # Step 3: Calibrate resistivity with filtered temperature data
     calibrate_resistivity(txt_output_folder, corrected_output_folder_detailed, corrected_output_folder_simplified,
                           filtered_temp_output)
     print("Resistivity calibration completed.")
 
     print("Data processing completed.")
+
+
 
 
 def exit_application(MainWindow):
@@ -253,10 +261,11 @@ def start_inversion_with_parameters(ui):
     else:
         print("No processed file selected. Please select a file first.")
 
+
 def run_inversion_and_display_output(ui, start_coords, end_coords, quality, area, inversion_params, file_path):
     """
     Run the inversion process and display the output image in the UI.
-    
+
     Parameters:
         ui: Instance of Ui_MainWindow.
         start_coords: Start coordinates for inversion.
@@ -282,6 +291,7 @@ def run_inversion_and_display_output(ui, start_coords, end_coords, quality, area
 
     except Exception as e:
         print(f"Error during inversion: {e}")
+
 
 def start_water_computation_with_parameters(ui):
     """
