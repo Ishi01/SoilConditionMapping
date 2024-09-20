@@ -1,10 +1,8 @@
 import glob
 import os
 
-import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import numpy as np
-import pybert as pb
 import pygimli as pg
 import pygimli.meshtools as mt
 from pygimli.physics import ert
@@ -36,43 +34,43 @@ def cleanup_temp_files():
                 print(f"Error removing {file}: {e}")
 
 
-def get_first_raw_file():
-    raw_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Raw")
-    files = [
-        f for f in os.listdir(raw_folder) if os.path.isfile(os.path.join(raw_folder, f))
-    ]
-    if not files:
-        raise FileNotFoundError("No files found in the Raw folder")
-    return os.path.join(raw_folder, sorted(files)[0])
+# def get_first_raw_file():
+#     raw_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Raw")
+#     files = [
+#         f for f in os.listdir(raw_folder) if os.path.isfile(os.path.join(raw_folder, f))
+#     ]
+#     if not files:
+#         raise FileNotFoundError("No files found in the Raw folder")
+#     return os.path.join(raw_folder, sorted(files)[0])
 
 
 def create_mesh(start=[0, 0],
-    end=[47, -8],
-    quality=33.5,
-    area=0.5):
-     # Create Geometry and Mesh
+                end=[47, -8],
+                quality=33.5,
+                area=0.5):
+    # Create Geometry and Mesh
     geom = mt.createWorld(start=start, end=end, worldMarker=False)
     mesh = mt.createMesh(geom, quality=quality, area=area, smooth=True)
     mesh.save("mesh.bms")
     return mesh
 
 
-def startInversion(
-    maxIter=6,
-    lam=7,
-    dPhi=2,
-    start=[0, 0],
-    end=[47, -8],
-    quality=33.5,
-    area=0.5,
-    zWeight=0.7,
-):
+def startInversion(start, end, quality, area, inversion_params, file_path, zWeight=0.7):
+    # Unpack inversion parameters
+    lam = inversion_params["lambda"]
+    maxIter = inversion_params["max_iterations"]
+    dPhi = inversion_params["dphi"]
+    robust_data = inversion_params["robust_data"]
+
+    # Log inversion starting details
+    print(f"Starting inversion with file: {file_path}")
+    print(f"Using parameters: lambda={lam}, maxIter={maxIter}, dPhi={dPhi}, robust={robust_data}, zWeight={zWeight}")
 
     output_dir = ensure_output_folder()
 
     # Load the data file, the first file under /Raw
     try:
-        file_to_convert = get_first_raw_file()
+        file_to_convert = file_path
     except FileNotFoundError as e:
         pg.error(str(e))
         return
@@ -103,7 +101,7 @@ def startInversion(
     # Chi-squared represents the goodness of fit between the model and the observed data.
     for iteration in range(maxIter):
         inv = mgr.invert(
-            mesh=mesh, zWeight=zWeight,lam=lam, maxIter=1, dPhi=dPhi, CHI1OPT=5, Verbose=True
+            mesh=mesh, zWeight=zWeight, lam=lam, maxIter=1, dPhi=dPhi, CHI1OPT=5, Verbose=True
         )
 
         if hasattr(inv, "chi2"):
@@ -135,9 +133,14 @@ def startInversion(
     plt.savefig(fig_filename, dpi=300, bbox_inches="tight")
     print(f"Figure saved as: {fig_filename}")
 
-    plt.close(fig1)  
-    plt.close("all")  
+    plt.close(fig1)
+    plt.close("all")
 
-if __name__ == "__main__":
-    startInversion()
     cleanup_temp_files()
+
+    return fig_filename  # Return the path of the saved figure
+
+
+# if __name__ == "__main__":
+#     startInversion()
+#     cleanup_temp_files()
