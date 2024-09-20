@@ -39,26 +39,19 @@ python txt_temp.py Newtem.txt output_txt_offset/
 ```bash
 python auto_tx0_txt_temp.py
 ```
-# Temperature Correction Formula for Resistivity
+## Temperature Correction Formula for Resistivity
 
-The following formula is used to correct resistivity based on temperature:
-
-\[
-\rho_{\text{corrected}} = \rho_{\text{measured}} \times [1 + \alpha(T - T_{\text{ref}})]
-\]
-
+### Math formula 
+This formula can be expressed mathematically as:
+ρ_corrected = ρ_measured * [1 + α(T - T_ref)]
 Where:
-- \(\rho_{\text{corrected}}\) is the **corrected resistivity**
-- \(\rho_{\text{measured}}\) is the **measured resistivity**
-- \(\alpha\) is the **temperature coefficient** (0.025 /°C in this formula)
-- \(T\) is the **actual temperature**
-- \(T_{\text{ref}}\) is the **reference temperature** (25°C in this formula)
-
-In the specific case used in the code, the formula is written as:
-
-\[
-\rho_{\text{corrected}} = \rho_{\text{measured}} \times [1 + 0.025(T - 25)]
-\]
+ρ_corrected is the **corrected resistivity**
+ρ_measured is the **measured resistivity**
+α is the temperature **coefficient** (0.025 /°C in this formula)
+T is the **actual** temperature
+T_ref is the `reference` temperature (25°C in this formula)
+The specific `formula` used in the code is:
+ρ_corrected = ρ_measured * [1 + 0.025(T - 25)]
 
 This formula accounts for the **effect of temperature on resistivity**, allowing the measured resistivity to be corrected to a **standard temperature** of 25°C. The temperature coefficient of 0.025 /°C means that for every **1°C deviation** from the reference temperature, the resistivity changes by **2.5%**.
 
