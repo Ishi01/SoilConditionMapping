@@ -1,0 +1,36 @@
+name: Python Package using Conda
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+    pull_request:
+      branches:
+        - dev
+        - main
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+      max-parallel: 3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-activate-base: false
+
+      - name: Create Conda environment
+        run: conda env create --file environment.yml
+
+      - name: Verify Python version in Conda environment
+        run: conda run -n pg python --version
+
+      - name: Test with pytest in Conda environment
+        run: conda run -n pg python DataInversion/ERT_Main.py
