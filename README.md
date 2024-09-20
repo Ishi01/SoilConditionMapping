@@ -87,7 +87,7 @@ pytest
 # Data Processing Workflow for tx0_to_txt_temp Pipeline
 
 
-# 1. Run ```tx0_to_txt_offset.py```
+## 1. Run ```tx0_to_txt_offset.py```
 
 
   - **Input**: `tx0_files` folder
@@ -104,7 +104,7 @@ python tx0_to_txt_offset.py tx0_files/ output_txt_offset/
 ```
 
 
-# 2. Run ```Newtem.py```
+## 2. Run ```Newtem.py```
 
 
 
@@ -125,7 +125,7 @@ python Newtem.py output_txt_offset/ GNtemp.txt
 
 
 
-# 3. Run ```txt_temp.py```
+## 3. Run ```txt_temp.py```
 
 
   - **Input**: `output_txt_offset` folder and `Newtem.txt` file
@@ -138,7 +138,7 @@ python txt_temp.py Newtem.txt output_txt_offset/
 ```
 
 
-# 4. Run ```auto_tx0_txt_temp.py``` to automate the above process.
+## 4. Run ```auto_tx0_txt_temp.py``` to automate the above process.
 
 
   - **Input**: `tx0_files` folder and  `GNtemp.txt` file
@@ -149,7 +149,7 @@ python txt_temp.py Newtem.txt output_txt_offset/
 python auto_tx0_txt_temp.py
 ```
 
-
+## 5. Math formula 
 This formula can be expressed mathematically as:<br />
 ρ_corrected = ρ_measured * [1 + α(T - T_ref)]<br />
 Where:<br />
