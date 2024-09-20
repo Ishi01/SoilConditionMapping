@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
+        MainWindow.setObjectName("Soil Water Content Mapping")
         MainWindow.resize(870, 675)
         MainWindow.setMinimumSize(QtCore.QSize(870, 675))
         MainWindow.setMaximumSize(QtCore.QSize(870, 675))
