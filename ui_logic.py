@@ -78,26 +78,26 @@ def open_file_browser(text_edit, tx0=True):
             text_edit.append(file)
 
 
-def start_data_processing(ui):
+def start_data_processing(ui, tx0_input_folder, selected_temperature_file):
     """
     Logic to execute when the "Start" button is clicked.
 
     Parameters:
         ui: Instance of Ui_MainWindow.
+        tx0_input_folder: Path to the folder containing the tx0 files.
+        selected_temperature_file: Path to the temperature file.
     """
-    global global_tx0_input_folder
-    global global_selected_temperature_file
 
     # Get the converter option
     converter_choice = "1" if ui.XZcheckBox.isChecked() else "2"
 
     # If the tx0 folder is not set, prompt the user to select it
-    if not global_tx0_input_folder:
+    if not tx0_input_folder:
         print("Please use the 'Browser' button to select tx0 files first.")
         return
 
     # If the temperature file is not set, prompt the user to select it
-    if not global_selected_temperature_file:
+    if not selected_temperature_file:
         print("Please use the 'Browser' button to select the temperature file first.")
         return
 
@@ -120,7 +120,7 @@ def start_data_processing(ui):
     print("Conversion from tx0 to txt completed.")
 
     # Step 2: Filter temperature data by date
-    filter_temperature_data_by_date(txt_output_folder, global_selected_temperature_file, filtered_temp_output)
+    filter_temperature_data_by_date(txt_output_folder, selected_temperature_file, filtered_temp_output)
     print("Temperature data filtering completed.")
 
     # Step 3: Calibrate resistivity with filtered temperature data
@@ -129,7 +129,6 @@ def start_data_processing(ui):
     print("Resistivity calibration completed.")
 
     print("Data processing completed.")
-
 
 
 
