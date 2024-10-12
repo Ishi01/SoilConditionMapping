@@ -1,6 +1,8 @@
 import pytest
 from unittest.mock import patch, Mock, call, MagicMock
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+
+import ui_logic
 from UI import Ui_MainWindow
 from ui_logic import setup_ui_logic, start_data_processing, reset_all_fields, open_file_browser
 
@@ -33,58 +35,31 @@ def test_open_file_browser_select_tx0_files(ui):
 
 
 def test_start_data_processing_without_files(ui):
-    global global_tx0_input_folder, global_selected_temperature_file
-
-    # 测试两个文件都未选择的情况
-    with patch.dict('builtins.__dict__', {'global_tx0_input_folder': None, 'global_selected_temperature_file': None}):
-        with patch('builtins.print') as mock_print, \
-                patch('PyQt5.QtWidgets.QFileDialog.getExistingDirectory', return_value='') as mock_dialog, \
-                patch('data_processor.convert_tx0_to_txt') as mock_convert, \
-                patch('data_processor.filter_temperature_data_by_date') as mock_filter, \
-                patch('data_processor.calibrate_resistivity') as mock_calibrate:
-            start_data_processing(ui)
-
-            expected_calls = [
-                call(f"Debug: global_tx0_input_folder = {global_tx0_input_folder}"),
-                call(f"Debug: global_selected_temperature_file = {global_selected_temperature_file}"),
-                call("Please use the 'Browser' button to select tx0 files first.")
-            ]
-
-            assert mock_print.mock_calls == expected_calls, f"Expected calls: {expected_calls}, but got: {mock_print.mock_calls}"
-
-    # 测试只选择了 tx0 文件的情况
-    with patch.dict('builtins.__dict__',
-                    {'global_tx0_input_folder': "dummy_path", 'global_selected_temperature_file': None}):
-        with patch('builtins.print') as mock_print, \
-                patch('PyQt5.QtWidgets.QFileDialog.getExistingDirectory', return_value='') as mock_dialog, \
-                patch('data_processor.convert_tx0_to_txt') as mock_convert, \
-                patch('data_processor.filter_temperature_data_by_date') as mock_filter, \
-                patch('data_processor.calibrate_resistivity') as mock_calibrate:
-            start_data_processing(ui)
-
-            expected_calls = [
-                call(f"Debug: global_tx0_input_folder = dummy_path"),
-                call(f"Debug: global_selected_temperature_file = {global_selected_temperature_file}"),
-                call("Please use the 'Browser' button to select the temperature file first.")
-            ]
-
-            assert mock_print.mock_calls == expected_calls, f"Expected calls: {expected_calls}, but got: {mock_print.mock_calls}"
-
-
-def test_start_data_processing_with_files(ui):
-    """测试在选择了文件后的数据处理流程"""
-    # 模拟选择了 tx0 文件和温度文件
-    global global_tx0_input_folder, global_selected_temperature_file
-    global_tx0_input_folder = "dummy_folder_path"
-    global_selected_temperature_file = "dummy_temp_file.txt"
-
-    ui.textEditProcessedTxtPreview.setText("test.tx0")
-    ui.textEditProcessedTempPreview.setText("temperature.txt")
-
-    with patch('PyQt5.QtWidgets.QFileDialog.getExistingDirectory', return_value="output_dir"), \
+    with patch('ui_logic.global_tx0_input_folder', None), \
+         patch('ui_logic.global_selected_temperature_file', None), \
+         patch('builtins.print') as mock_print, \
+         patch('PyQt5.QtWidgets.QFileDialog.getExistingDirectory', return_value='') as mock_dialog, \
          patch('data_processor.convert_tx0_to_txt') as mock_convert, \
          patch('data_processor.filter_temperature_data_by_date') as mock_filter, \
          patch('data_processor.calibrate_resistivity') as mock_calibrate:
+        start_data_processing(ui)
+
+        expected_calls = [
+            call(f"Debug: global_tx0_input_folder = {ui_logic.global_tx0_input_folder}"),
+            call(f"Debug: global_selected_temperature_file = {ui_logic.global_selected_temperature_file}"),
+            call("Please use the 'Browser' button to select tx0 files first.")
+        ]
+
+        assert mock_print.mock_calls == expected_calls, f"Expected calls: {expected_calls}, but got: {mock_print.mock_calls}"
+
+def test_start_data_processing_with_files(ui):
+    """测试在选择了文件后的数据处理流程"""
+    with patch('ui_logic.global_tx0_input_folder', "dummy_folder_path"), \
+         patch('ui_logic.global_selected_temperature_file', "dummy_temp_file.txt"), \
+         patch('PyQt5.QtWidgets.QFileDialog.getExistingDirectory', return_value="output_dir"), \
+         patch('ui_logic.convert_tx0_to_txt') as mock_convert, \
+         patch('ui_logic.filter_temperature_data_by_date') as mock_filter, \
+         patch('ui_logic.calibrate_resistivity') as mock_calibrate:
         start_data_processing(ui)
         mock_convert.assert_called_once()
         mock_filter.assert_called_once()
