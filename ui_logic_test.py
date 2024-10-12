@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from unittest.mock import patch, Mock, call, MagicMock
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
@@ -10,6 +12,8 @@ from ui_logic import setup_ui_logic, start_data_processing, reset_all_fields, op
 # 1. 创建 QApplication 实例的 fixture
 @pytest.fixture(scope='module')
 def app():
+    # Set the environment variable before creating QApplication
+    os.environ['QT_QPA_PLATFORM'] = 'offscreen'
     app = QApplication([])
     yield app
     app.exit()
