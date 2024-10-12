@@ -5,6 +5,7 @@ on:
     branches:
       - dev
       - main
+      - Batch_Processing
     pull_request:
       branches:
         - dev
@@ -32,5 +33,11 @@ jobs:
       - name: Verify Python version in Conda environment
         run: conda run -n pg python --version
 
-      - name: Test with pytest in Conda environment
+      - name: Test with pytest in Conda environment for UI (data processing and I/O)
+        run: conda run -n pg python ui_logic_test.py
+
+      - name: Test with pytest in Conda environment for Data Inversion
         run: conda run -n pg python DataInversion/ERT_Main.py
+
+      - name: Test with pytest in Conda environment for Water Content
+        run: conda run -n pg python WaterContent/Water_test.py
