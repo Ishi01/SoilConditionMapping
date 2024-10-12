@@ -8,8 +8,10 @@ from data_processor import convert_tx0_to_txt, filter_temperature_data_by_date, 
 import tempfile
 import subprocess
 import platform
+import base64
 from DataInversion.ERT_Main import startInversion
 from WaterContent.Water_Content_Main import water_computing
+from temp_depth_graph import display_temp_vs_depth
 
 # global var
 global_tx0_input_folder = None
@@ -45,6 +47,9 @@ def setup_ui_logic(ui, MainWindow):
     ui.buttonBoxResetConfirmSave_2.button(QDialogButtonBox.Save).clicked.connect(
         lambda: save_output_file(ui, MainWindow))
 
+    # Batch Data processing (Note typo here)
+    ui.pushButtonBashProcess.clicked.connect(lambda: start_batch_processing(ui))
+
 
 def open_file_browser(text_edit, tx0=True):
     """
@@ -78,32 +83,40 @@ def open_file_browser(text_edit, tx0=True):
             text_edit.append(file)
 
 
-def start_data_processing(ui, tx0_input_folder, selected_temperature_file):
+def start_data_processing(ui):
     """
     Logic to execute when the "Start" button is clicked.
 
     Parameters:
         ui: Instance of Ui_MainWindow.
-        tx0_input_folder: Path to the folder containing the tx0 files.
+        tx0_input_file: Path to the folder containing the tx0 files.
         selected_temperature_file: Path to the temperature file.
     """
+    global global_tx0_input_folder
+    global global_selected_temperature_file
 
-    # Get the converter option
-    converter_choice = "1" if ui.XZcheckBox.isChecked() else "2"
+    print(f"Debug: global_tx0_input_folder = {global_tx0_input_folder}")
+    print(f"Debug: global_selected_temperature_file = {global_selected_temperature_file}")
 
-    # If the tx0 folder is not set, prompt the user to select it
-    if not tx0_input_folder:
+    tx0_input_file = global_tx0_input_folder
+    selected_temperature_file = global_selected_temperature_file
+
+    # Check tx0 file
+    if not tx0_input_file:
         print("Please use the 'Browser' button to select tx0 files first.")
         return
 
-    # If the temperature file is not set, prompt the user to select it
+    # Check temperature file
     if not selected_temperature_file:
         print("Please use the 'Browser' button to select the temperature file first.")
         return
 
-    # Select Output Directory
+    # set converter
+    converter_choice = "1"
+
+    # select output menu
     output_directory = QFileDialog.getExistingDirectory(None, "Select Output Directory", "")
-    if not output_directory:  # use default if cancelled
+    if not output_directory:  # no selection on output file, create default output directory
         output_directory = os.path.join(os.getcwd(), 'outputs')
 
     corrected_output_folder_detailed = Path(output_directory, 'corrected_resistivity_detailed')
@@ -128,8 +141,100 @@ def start_data_processing(ui, tx0_input_folder, selected_temperature_file):
                           filtered_temp_output)
     print("Resistivity calibration completed.")
 
+    try:
+        # Assume only one file is used
+        tx0_file = os.listdir(global_tx0_input_folder)[0]
+
+        # Generate temp vs depth plot with Base64 encoded image
+        plot_image_base64 = display_temp_vs_depth(os.path.join(global_tx0_input_folder, tx0_file),
+                                                  global_selected_temperature_file)
+
+        if plot_image_base64:
+            print("Successfully generate plot of temperature vs depth")
+            with open(os.path.join(output_directory, "temp_vs_depth_plot.png"), "wb") as f:
+                f.write(base64.b64decode(plot_image_base64))
+            print(f"Temp_vs_depth plot saved to {output_directory}/temp_vs_depth_plot.png")
+        else:
+            print("failed generating temperature vs depth plot")
+
+    except Exception as e:
+        print(f"Error generating temperature vs depth plot: {str(e)}")
+
     print("Data processing completed.")
 
+
+def start_batch_processing(ui):
+    """
+    Logic to execute when the "Batch Process" button is clicked, and process all tx0 files in the selected folder.
+
+    This function will process multiple tx0 files, convert them to txt, filter temperature data, and calibrate resistivity.
+    No image generation and no converter selection (default converter_choice = 1).
+
+    This version uses subprocess to run the batch processing in the background, allowing the UI to remain responsive.
+    """
+
+    # Step 1: Select input folder containing tx0 files
+    tx0_input_folder = QFileDialog.getExistingDirectory(None, "Select Folder Containing tx0 Files", "")
+    if not tx0_input_folder:
+        print("No tx0 input folder selected. Operation cancelled.")
+        return
+
+    # Step 2: Select temperature file
+    selected_temperature_file, _ = QFileDialog.getOpenFileName(None, "Select Temperature File", "", "Text Files (*.txt);;All Files (*)")
+    if not selected_temperature_file:
+        print("No temperature file selected. Operation cancelled.")
+        return
+
+    # Step 3: Select output directory for processed data
+    output_directory = QFileDialog.getExistingDirectory(None, "Select Output Directory", "")
+    if not output_directory:  # No selection on output directory, create default output directory
+        output_directory = os.path.join(os.getcwd(), 'outputs')
+
+    corrected_output_folder_detailed = os.path.join(output_directory, 'corrected_resistivity_detailed')
+    corrected_output_folder_simplified = os.path.join(output_directory, 'corrected_resistivity_simplified')
+
+    # Ensure output directories exist
+    os.makedirs(corrected_output_folder_detailed, exist_ok=True)
+    os.makedirs(corrected_output_folder_simplified, exist_ok=True)
+
+    # Temporary output folders for txt and filtered temperature data
+    txt_output_folder = tempfile.mkdtemp()
+    filtered_temp_output = os.path.join(tempfile.mkdtemp(), 'Newtem.txt')
+
+    # Step 4: Call the batch process via subprocess
+    # Use the subprocess to run the data_processor functions without blocking the UI
+    try:
+        print(f"Starting batch processing...")
+
+        subprocess.run(
+            [
+                "python",  # Assuming you are using Python to run the script
+                "-c",  # Inline Python code
+                f"""
+import os
+from data_processor import convert_tx0_to_txt, filter_temperature_data_by_date, calibrate_resistivity
+
+# Convert tx0 to txt
+convert_tx0_to_txt(r'{tx0_input_folder}', r'{txt_output_folder}', '1')
+
+# Filter temperature data by date
+filter_temperature_data_by_date(r'{txt_output_folder}', r'{selected_temperature_file}', r'{filtered_temp_output}')
+
+# Calibrate resistivity with filtered temperature data
+calibrate_resistivity(r'{txt_output_folder}', r'{corrected_output_folder_detailed}', r'{corrected_output_folder_simplified}', r'{filtered_temp_output}')
+
+print("Batch processing completed successfully.")
+"""
+            ],
+            check=True
+        )
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error during batch processing: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+
+    print("Batch processing completed for all files.")
 
 
 def exit_application(MainWindow):

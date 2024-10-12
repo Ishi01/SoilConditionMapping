@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("Soil Water Content Mapping")
+        MainWindow.setObjectName("MainWindow")
         MainWindow.resize(870, 675)
         MainWindow.setMinimumSize(QtCore.QSize(870, 675))
         MainWindow.setMaximumSize(QtCore.QSize(870, 675))
@@ -89,6 +89,9 @@ class Ui_MainWindow(object):
         self.pushButtonTempDir = QtWidgets.QPushButton(self.DataInputTab)
         self.pushButtonTempDir.setGeometry(QtCore.QRect(600, 530, 111, 41))
         self.pushButtonTempDir.setObjectName("pushButtonTempDir")
+        self.pushButtonBashProcess = QtWidgets.QPushButton(self.DataInputTab)
+        self.pushButtonBashProcess.setGeometry(QtCore.QRect(724, 10, 111, 24))
+        self.pushButtonBashProcess.setObjectName("pushButtonBashProcess")
         self.tabWidget.addTab(self.DataInputTab, "")
         self.Inversion = QtWidgets.QWidget()
         self.Inversion.setObjectName("Inversion")
@@ -103,16 +106,19 @@ class Ui_MainWindow(object):
 "    border: none;\n"
 "}")
         self.textEdit_9.setObjectName("textEdit_9")
-        self.labelDepthImage = QtWidgets.QLabel(self.page_2)
-        self.labelDepthImage.setGeometry(QtCore.QRect(100, 90, 651, 441))
-        self.labelDepthImage.setObjectName("labelDepthImage")
-        self.labelDepthImage.setScaledContents(False)
+        self.graphicsViewDepth = QtWidgets.QGraphicsView(self.page_2)
+        self.graphicsViewDepth.setGeometry(QtCore.QRect(100, 90, 651, 181))
+        self.graphicsViewDepth.setObjectName("graphicsViewDepth")
         self.toolButton = QtWidgets.QToolButton(self.page_2)
         self.toolButton.setGeometry(QtCore.QRect(720, 560, 131, 22))
         self.toolButton.setObjectName("toolButton")
         self.label_10 = QtWidgets.QLabel(self.page_2)
         self.label_10.setGeometry(QtCore.QRect(350, 60, 111, 21))
         self.label_10.setObjectName("label_10")
+        self.labelDepthImage = QtWidgets.QLabel(self.page_2)
+        self.labelDepthImage.setGeometry(QtCore.QRect(100, 280, 651, 181))
+        self.labelDepthImage.setText("")
+        self.labelDepthImage.setObjectName("labelDepthImage")
         self.stackedWidget.addWidget(self.page_2)
         self.page_1 = QtWidgets.QWidget()
         self.page_1.setObjectName("page_1")
@@ -476,13 +482,16 @@ class Ui_MainWindow(object):
 "    border: none;\n"
 "}")
         self.textEdit_11.setObjectName("textEdit_11")
-        self.labelSWC = QtWidgets.QLabel(self.page_3)
-        self.labelSWC.setGeometry(QtCore.QRect(150, 90, 651, 441))
-        self.labelSWC.setObjectName("labelSWC")
-        self.labelSWC.setScaledContents(False)
+        self.graphicsViewSWC = QtWidgets.QGraphicsView(self.page_3)
+        self.graphicsViewSWC.setGeometry(QtCore.QRect(150, 90, 651, 191))
+        self.graphicsViewSWC.setObjectName("graphicsViewSWC")
         self.toolButton_2 = QtWidgets.QToolButton(self.page_3)
         self.toolButton_2.setGeometry(QtCore.QRect(770, 560, 131, 22))
         self.toolButton_2.setObjectName("toolButton_2")
+        self.labelSWC = QtWidgets.QLabel(self.page_3)
+        self.labelSWC.setGeometry(QtCore.QRect(150, 310, 651, 171))
+        self.labelSWC.setText("")
+        self.labelSWC.setObjectName("labelSWC")
         self.stackedWidget_2.addWidget(self.page_3)
         self.tabWidget.addTab(self.WaterContent, "")
         MainWindow.setCentralWidget(self.centralwidget)
@@ -574,6 +583,7 @@ class Ui_MainWindow(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas\'; font-size:12pt; color:#838383;\">Tempareture file directory</span></p></body></html>"))
         self.pushButtonOpenTx0Dir.setText(_translate("MainWindow", "Open..."))
         self.pushButtonTempDir.setText(_translate("MainWindow", "Open..."))
+        self.pushButtonBashProcess.setText(_translate("MainWindow", "Batch Process"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.DataInputTab), _translate("MainWindow", "Data Input"))
         self.textEdit_9.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
@@ -673,3 +683,13 @@ class Ui_MainWindow(object):
         self.actionInstall_Dependency.setText(_translate("MainWindow", "Install Dependency..."))
         self.actionActivate_conda_environment.setText(_translate("MainWindow", "Activate conda environment"))
         self.actionDeactivate_conda_environment.setText(_translate("MainWindow", "Deactivate conda environment"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
