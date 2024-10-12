@@ -29,7 +29,6 @@ def setup_ui_logic(ui, MainWindow):
 
     # Bind OK button to start the inversion with parameters
     ui.buttonBoxResetConfirmSave.accepted.connect(lambda: start_inversion_with_parameters(ui))
-    ui.buttonBoxResetConfirmSave_2.accepted.connect(lambda: start_water_computation_with_parameters(ui))
 
     # Bind exit action to close the application
     ui.actionExit.triggered.connect(lambda: exit_application(MainWindow))
@@ -329,6 +328,12 @@ def start_inversion_with_parameters(ui):
         max_iterations = int(ui.IterationLineEdit.text()) if ui.IterationLineEdit.text() else 6
         dphi = float(ui.dPhiLineEdit.text()) if ui.dPhiLineEdit.text() else 2
         robust_data = ui.checkBox.isChecked()
+
+        A = float(ui.ALineEdit.text()) if ui.ALineEdit.text() else 246.47
+        B = float(ui.BLineEdit.text()) if ui.BLineEdit.text() else -0.627
+
+        compute_water_content = ui.computeWaterContentCheckBox.isChecked()
+
     except ValueError as e:
         print(f"Error in conversion: {e}")
         return
@@ -352,6 +357,34 @@ def start_inversion_with_parameters(ui):
             inversion_params,
             processed_file_path
         )
+
+        if compute_water_content:
+            try:
+                # Run water content computation
+                water_content_image_path = water_computing(
+                    [start_x, start_z],
+                    [end_x, end_z],
+                    quality,
+                    area,
+                    lambda_value,
+                    max_iterations,
+                    dphi,
+                    A,
+                    B,
+                    processed_file_path
+                )
+
+                if water_content_image_path and os.path.exists(water_content_image_path):
+                    pixmap_wc = QPixmap(water_content_image_path)
+                    ui.labelSWC.setPixmap(pixmap_wc)
+                    ui.labelSWC.setScaledContents(True)
+                    ui.labelSWC.setAlignment(QtCore.Qt.AlignCenter)
+                    print(f"Water content image displayed: {water_content_image_path}")
+                else:
+                    print("Water content image file not found.")
+
+            except Exception as e:
+                print(f"Error during water content computation: {e}")
 
         if output_image_path and os.path.exists(output_image_path):
             pixmap = QPixmap(output_image_path)
@@ -397,51 +430,6 @@ def run_inversion_and_display_output(ui, start_coords, end_coords, quality, area
         print(f"Error during inversion: {e}")
 
 
-def start_water_computation_with_parameters(ui):
-    """
-    Capture water computation parameters from the UI and initiate the process.
-    """
-    processed_file_path = select_processed_file()
-
-    if not processed_file_path:
-        print("No processed file selected. Please select a file first.")
-        return
-
-    try:
-        start_x = float(ui.startXLineEdit_WC.text()) if ui.startXLineEdit_WC.text() else 0
-        start_z = float(ui.startZLineEdit_WC.text()) if ui.startZLineEdit_WC.text() else 0
-        end_x = float(ui.endXLineEdit_WC.text()) if ui.endXLineEdit_WC.text() else 47
-        end_z = float(ui.endZLineEdit_WC.text()) if ui.endZLineEdit_WC.text() else -8
-        quality = float(ui.qualityLineEdit_WC.text()) if ui.qualityLineEdit_WC.text() else 33.5
-        area = float(ui.areaLineEdit_WC.text()) if ui.areaLineEdit_WC.text() else 0.5
-        lambda_value = float(ui.LambdaLineEdit_WC.text()) if ui.LambdaLineEdit_WC.text() else 10
-        max_iterations = int(ui.IterationLineEdit_WC.text()) if ui.IterationLineEdit_WC.text() else 6
-        dphi = float(ui.dPhiLineEdit_WC.text()) if ui.dPhiLineEdit_WC.text() else 2
-
-        A = float(ui.ALineEdit.text()) if ui.ALineEdit.text() else 246.47
-        B = float(ui.BLineEdit.text()) if ui.BLineEdit.text() else -0.627
-
-    except ValueError as e:
-        print(f"Error in conversion: {e}")
-        return
-
-    try:
-        image_path = water_computing(
-            [start_x, start_z], [end_x, end_z], quality, area, lambda_value,
-            max_iterations, dphi, A, B, processed_file_path
-        )
-
-        if image_path and os.path.exists(image_path):
-            pixmap = QPixmap(image_path)
-            ui.labelSWC.setPixmap(pixmap)
-            ui.labelSWC.setScaledContents(True)
-            ui.labelSWC.setAlignment(QtCore.Qt.AlignCenter)
-            print(f"Image displayed on labelSWC: {image_path}")
-            ui.stackedWidget_2.setCurrentWidget(ui.page_3)
-        else:
-            print("Image path is invalid or file does not exist.")
-    except Exception as e:
-        print(f"Error during water_computing: {e}")
 
 
 def save_output_file(ui, MainWindow):
