@@ -1,6 +1,7 @@
 import os
+import sys
 import shutil
-from PyQt5.QtWidgets import QFileDialog, QApplication, QDialogButtonBox
+from PyQt5.QtWidgets import QFileDialog, QApplication, QDialogButtonBox, QStatusBar
 from pathlib import Path
 from PyQt5.QtGui import QPixmap
 from PyQt5 import QtCore
@@ -11,7 +12,7 @@ import platform
 import base64
 from DataInversion.ERT_Main import startInversion
 from WaterContent.Water_Content_Main import water_computing
-from temp_depth_graph import display_temp_vs_depth
+from lib.temp_depth_graph import display_temp_vs_depth
 
 # global var
 global_tx0_input_folder = None
@@ -23,6 +24,8 @@ def setup_ui_logic(ui, MainWindow):
     """
     Bind UI events and logic.
     """
+    redirect_print_to_status_bar(ui)
+
     ui.pushButtonBrowserFiles.clicked.connect(lambda: open_file_browser(ui.textEditProcessedTxtPreview, tx0=True))
     ui.pushButtonBrowserTempFiles.clicked.connect(lambda: open_file_browser(ui.textEditProcessedTempPreview, tx0=False))
     ui.pushButtonStartDataProcessing.clicked.connect(lambda: start_data_processing(ui))
@@ -49,6 +52,27 @@ def setup_ui_logic(ui, MainWindow):
     # Batch Data processing (Note typo here)
     ui.pushButtonBashProcess.clicked.connect(lambda: start_batch_processing(ui))
 
+    ui.toolButton.clicked.connect(lambda: open_directory(global_inversion_params.get('output_image_folder')))
+
+
+def redirect_print_to_status_bar(ui):
+    """
+    Redirects all print outputs to the status bar of the UI.
+    """
+    class StreamToStatusBar:
+        def __init__(self, status_bar):
+            self.status_bar = status_bar
+
+        def write(self, text):
+            if text.strip():  # Ignore empty strings
+                self.status_bar.showMessage(text, 5000)  # Show the message in the status bar for 5 seconds
+
+        def flush(self):
+            pass
+
+    # Set the new stream for stdout
+    sys.stdout = StreamToStatusBar(ui.statusbar)
+
 
 def open_file_browser(text_edit, tx0=True):
     """
@@ -71,6 +95,9 @@ def open_file_browser(text_edit, tx0=True):
             text_edit.clear()
             for file in files:
                 text_edit.append(file)
+                with open(file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                text_edit.append(content)
     else:
         file, _ = QFileDialog.getOpenFileName(None, "Select Temperature File", "", "Text Files (*.txt);;All Files (*)",
                                               options=options)
@@ -79,7 +106,10 @@ def open_file_browser(text_edit, tx0=True):
 
             # Display temperature file path in the text edit
             text_edit.clear()
-            text_edit.append(file)
+            text_edit.append(f"File Path: {file}\n")
+            with open(file, 'r', encoding='utf-8') as f:
+                content = f.read()
+            text_edit.append(content)
 
 
 def start_data_processing(ui):
@@ -95,7 +125,7 @@ def start_data_processing(ui):
     global global_selected_temperature_file
 
     print(f"Debug: global_tx0_input_folder = {global_tx0_input_folder}")
-    print(f"Debug: global_selected_temperature_file = {global_selected_temperature_file}")
+    print("Selected output directory")
 
     tx0_input_file = global_tx0_input_folder
     selected_temperature_file = global_selected_temperature_file
@@ -140,6 +170,17 @@ def start_data_processing(ui):
                           filtered_temp_output)
     print("Resistivity calibration completed.")
 
+    # Display the content of the output file in the UI text edit
+    output_files = list(corrected_output_folder_detailed.glob("*.txt"))
+    if output_files:
+        output_file_path = output_files[0]  # Assuming there is one file in the output folder
+        with open(output_file_path, 'r', encoding='utf-8') as f:
+            output_content = f.read()
+
+        ui.textEditProcessedTxtPreview.clear()
+        ui.textEditProcessedTxtPreview.append(f"Output File: {output_file_path}\n")
+        ui.textEditProcessedTxtPreview.append(output_content)
+
     try:
         # Assume only one file is used
         tx0_file = os.listdir(global_tx0_input_folder)[0]
@@ -173,18 +214,21 @@ def start_batch_processing(ui):
     """
 
     # Step 1: Select input folder containing tx0 files
+    print("Step 1: Select input folder containing tx0 files")
     tx0_input_folder = QFileDialog.getExistingDirectory(None, "Select Folder Containing tx0 Files", "")
     if not tx0_input_folder:
         print("No tx0 input folder selected. Operation cancelled.")
         return
 
     # Step 2: Select temperature file
+    print("Step 2: Select temperature file")
     selected_temperature_file, _ = QFileDialog.getOpenFileName(None, "Select Temperature File", "", "Text Files (*.txt);;All Files (*)")
     if not selected_temperature_file:
         print("No temperature file selected. Operation cancelled.")
         return
 
     # Step 3: Select output directory for processed data
+    print("Step 3: Select output directory for processed data")
     output_directory = QFileDialog.getExistingDirectory(None, "Select Output Directory", "")
     if not output_directory:  # No selection on output directory, create default output directory
         output_directory = os.path.join(os.getcwd(), 'outputs')
@@ -287,12 +331,15 @@ def open_directory(directory):
     Open the specified directory in the system's file explorer.
     """
     if directory:
-        if platform.system() == "Windows":
-            os.startfile(directory)
-        elif platform.system() == "Darwin":
-            subprocess.Popen(["open", directory])
+        if os.path.exists(directory):
+            if platform.system() == "Windows":
+                os.startfile(directory)
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", directory])
+            else:
+                subprocess.Popen(["xdg-open", directory])
         else:
-            subprocess.Popen(["xdg-open", directory])
+            print("Directory does not exist.")
     else:
         print("Directory path is empty. Please select a valid directory.")
 
@@ -358,6 +405,10 @@ def start_inversion_with_parameters(ui):
             processed_file_path
         )
 
+        if output_image_path and os.path.exists(output_image_path):
+            output_image_folder = os.path.dirname(output_image_path)
+            global_inversion_params['output_image_folder'] = output_image_folder
+
         if compute_water_content:
             try:
                 # Run water content computation
@@ -379,6 +430,7 @@ def start_inversion_with_parameters(ui):
                     ui.labelSWC.setPixmap(pixmap_wc)
                     ui.labelSWC.setScaledContents(True)
                     ui.labelSWC.setAlignment(QtCore.Qt.AlignCenter)
+                    global_inversion_params['output_image_folder'] = os.path.dirname(water_content_image_path)
                     print(f"Water content image displayed: {water_content_image_path}")
                 else:
                     print("Water content image file not found.")
@@ -444,9 +496,4 @@ def save_output_file(ui, MainWindow):
 
 
 def get_output_content(ui):
-    output_file_path = ui.textEditProcessedTxtPreview.toPlainText()
-    if os.path.exists(output_file_path):
-        with open(output_file_path, 'r') as file:
-            content = file.read()
-        return content
-    return "No output file selected or file not found."
+    return ui.textEditProcessedTxtPreview.toPlainText()
