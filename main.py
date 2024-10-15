@@ -26,6 +26,7 @@ def main():
     ui.setupUi(main_window)
     setup_ui_logic(ui, main_window)
     main_window.show()
+    splash.close()
     sys.exit(app.exec_())
 
 
