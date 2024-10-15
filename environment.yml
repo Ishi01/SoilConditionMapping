@@ -9,5 +9,5 @@ dependencies:
   - pandas
   - matplotlib
   - numpy
-  - pyqt5
+  - pyqt
   - pip
