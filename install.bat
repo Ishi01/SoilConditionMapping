@@ -1,39 +1,49 @@
 @echo off
-REM Define the Miniconda installation path
-set CONDA_PATH=%USERPROFILE%\Miniconda3
+setlocal enabledelayedexpansion
 
-REM Step 1: Check if Miniconda is installed, if not, install it
+REM Get the directory of this batch file
+set "SCRIPT_DIR=%~dp0"
+
+REM Define the Miniconda installation path
+set "CONDA_PATH=%USERPROFILE%\miniconda3"
+
+REM Check if Miniconda is installed
 if not exist "%CONDA_PATH%" (
     echo Miniconda not found. Installing Miniconda...
-    REM Run the Miniconda installer (assuming the installer is included in the same folder)
-    start /wait "" "Miniconda3-latest-Windows-x86_64.exe" /InstallationType=JustMe /AddToPath=0 /S /D=%CONDA_PATH%
-    call "%CONDA_PATH%\Scripts\conda.bat" init
+
+    REM Check if the Miniconda installer exists
+    if not exist "%SCRIPT_DIR%Miniconda3-latest-Windows-x86_64.exe" (
+        echo Miniconda installer not found in the script directory.
+        echo Please download Miniconda3-latest-Windows-x86_64.exe and place it in the same directory as this script.
+        pause
+        exit /b 1
+    )
+
+    REM Run the Miniconda installer
+    start /wait "" "%SCRIPT_DIR%Miniconda3-latest-Windows-x86_64.exe" /InstallationType=JustMe /AddToPath=0 /RegisterPython=0 /S /D=%CONDA_PATH%
+
+    echo Miniconda installed successfully.
 ) else (
-    echo Miniconda already installed.
+    echo Miniconda found at %CONDA_PATH%
 )
 
-REM Step 2: Add Miniconda to PATH for the current session
-set "PATH=%CONDA_PATH%\Scripts;%CONDA_PATH%\condabin;%PATH%"
+REM Add Miniconda to PATH for this session
+set "PATH=%CONDA_PATH%;%CONDA_PATH%\Scripts;%CONDA_PATH%\Library\bin;%PATH%"
 
-REM Step 3: Activate the base conda environment and update conda
-call conda.bat activate
-call conda.bat update conda -y
-
-REM Step 4: Create the project conda environment if it does not exist
-set CONDA_ENV_NAME=pg
-call conda env list | findstr /i %CONDA_ENV_NAME%
-if %ERRORLEVEL% NEQ 0 (
-    echo Creating Conda environment named %CONDA_ENV_NAME%...
-    call conda env create --file environment.yml
-) else (
-    echo Conda environment named %CONDA_ENV_NAME% already exists.
+REM Check if environment.yml exists
+if not exist "%SCRIPT_DIR%environment.yml" (
+    echo environment.yml not found in the script directory.
+    echo Please ensure environment.yml is in the same directory as this script.
+    pause
+    exit /b 1
 )
 
-REM Step 5: Activate the Conda environment
-call conda activate %CONDA_ENV_NAME%
+REM Create the conda environment
+set "ENV_NAME=pg"
+call conda env create -f "%SCRIPT_DIR%environment.yml"
 
-REM Step 6: Run the main Python script
-echo Running main.py...
-python main.py
+echo Environment setup complete.
+echo To activate the environment, use: conda activate %ENV_NAME%
+echo Or if you want to initiate the program, run SoilMapping.exe
 
 pause
