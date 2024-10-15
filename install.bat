@@ -15,38 +15,25 @@ if not exist "%CONDA_PATH%" (
 REM Step 2: Add Miniconda to PATH for the current session
 set "PATH=%CONDA_PATH%\Scripts;%CONDA_PATH%\condabin;%PATH%"
 
-REM Step 3: Activate the base conda environment to run commands
-call conda.bat activate base
+REM Step 3: Activate the base conda environment and update conda
+call conda.bat activate
+call conda.bat update conda -y
 
 REM Step 4: Create the project conda environment if it does not exist
 set CONDA_ENV_NAME=pg
-call conda env list | findstr /i %CONDA_ENV_NAME% >nul
+call conda env list | findstr /i %CONDA_ENV_NAME%
 if %ERRORLEVEL% NEQ 0 (
     echo Creating Conda environment named %CONDA_ENV_NAME%...
-    call conda.bat env create --file environment.yml
-    if %ERRORLEVEL% NEQ 0 (
-        echo Failed to create Conda environment. Exiting...
-        pause
-        exit /b
-    )
+    call conda env create --file environment.yml
 ) else (
     echo Conda environment named %CONDA_ENV_NAME% already exists.
 )
 
-REM Step 5: Create a temporary script to activate the environment and run the Python script
-echo Activating Conda environment and running the main Python script...
+REM Step 5: Activate the Conda environment
+call conda activate %CONDA_ENV_NAME%
 
-REM Create a temporary batch script for running the Python code within the conda environment
-set TEMP_SCRIPT="%TEMP%\run_pg_env.bat"
-echo @echo off > %TEMP_SCRIPT%
-echo call conda.bat activate %CONDA_ENV_NAME% >> %TEMP_SCRIPT%
-echo python main.py >> %TEMP_SCRIPT%
-echo exit >> %TEMP_SCRIPT%
-
-REM Step 6: Run the temporary script
-call %TEMP_SCRIPT%
-
-REM Clean up
-del %TEMP_SCRIPT%
+REM Step 6: Run the main Python script
+echo Running main.py...
+python main.py
 
 pause

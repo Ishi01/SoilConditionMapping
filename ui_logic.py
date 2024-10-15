@@ -42,12 +42,9 @@ def setup_ui_logic(ui, MainWindow):
 
     # Bind Reset buttons to reset all fields (corrected: only resets fields, does not trigger saving)
     ui.buttonBoxResetConfirmSave.button(QDialogButtonBox.Reset).clicked.connect(lambda: reset_all_fields(ui))
-    ui.buttonBoxResetConfirmSave_2.button(QDialogButtonBox.Reset).clicked.connect(lambda: reset_all_fields(ui))
 
     # Bind Save buttons to save the output (corrected: Save buttons trigger saving)
     ui.buttonBoxResetConfirmSave.button(QDialogButtonBox.Save).clicked.connect(lambda: save_output_file(ui, MainWindow))
-    ui.buttonBoxResetConfirmSave_2.button(QDialogButtonBox.Save).clicked.connect(
-        lambda: save_output_file(ui, MainWindow))
 
     # Batch Data processing (Note typo here)
     ui.pushButtonBashProcess.clicked.connect(lambda: start_batch_processing(ui))
@@ -399,7 +396,7 @@ def start_inversion_with_parameters(ui):
 
     if processed_file_path:
         # Run inversion and display output
-        output_image_path = startInversion(
+        output_image_path, ert_plot_filename = startInversion(
             [start_x, start_z],
             [end_x, end_z],
             quality,
@@ -411,6 +408,14 @@ def start_inversion_with_parameters(ui):
         if output_image_path and os.path.exists(output_image_path):
             output_image_folder = os.path.dirname(output_image_path)
             global_inversion_params['output_image_folder'] = output_image_folder
+
+        if ert_plot_filename and os.path.exists(ert_plot_filename):
+            # Display ERT Plot
+            pixmap_ert = QPixmap(ert_plot_filename)
+            ui.labelERT.setPixmap(pixmap_ert)
+            ui.labelERT.setScaledContents(True)
+            ui.labelERT.setAlignment(QtCore.Qt.AlignCenter)
+            print(f"ERT plot displayed: {ert_plot_filename}")
 
         if compute_water_content:
             try:
@@ -428,6 +433,7 @@ def start_inversion_with_parameters(ui):
                     processed_file_path
                 )
 
+                # Display Water Content Image
                 if water_content_image_path and os.path.exists(water_content_image_path):
                     pixmap_wc = QPixmap(water_content_image_path)
                     ui.labelSWC.setPixmap(pixmap_wc)
@@ -441,6 +447,7 @@ def start_inversion_with_parameters(ui):
             except Exception as e:
                 print(f"Error during water content computation: {e}")
 
+        # Display Inversion Output Image
         if output_image_path and os.path.exists(output_image_path):
             pixmap = QPixmap(output_image_path)
             ui.labelDepthImage.setPixmap(pixmap)
