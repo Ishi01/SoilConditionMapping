@@ -86,56 +86,82 @@ pytest
 
 # Data Processing Workflow for tx0_to_txt_temp Pipeline
 
+
 ## 1. Run ```tx0_to_txt_offset.py```
 
-   - **Input**: `tx0_files` folder
-   - **Output**: `output_txt_offset` folder
+
+  - **Input**: `tx0_files` folder
+  - **Output**: `output_txt_offset` folder
+  - The measured data is stored in the tx0_files folder inside the tx0_txt_tmp directory. The original .tx0 file structure is very complex, containing records of electrode positions, measurement data, and other configuration details. The purpose of this step is to simplify the complex content of the .tx0 files into a more structured and clearer data format through the Python script, removing unnecessary metadata and configuration details, and extracting the required data: Electrode positions (x, z) and Measurement data (a, b, m, n, rhoa, x, z).
+
+
+
 
 ```python
 python tx0_to_txt_offset.py tx0_files/ output_txt_offset/
 
+
 ```
+
 
 ## 2. Run ```Newtem.py```
 
 
-   - **Input**: `output_txt_offset` folder and `GNtemp.txt` file
-   - **Output**: `Newtem.txt` 
+
+
+  - **Input**: `output_txt_offset` folder and `GNtemp.txt` file
+  - **Output**: `Newtem.txt`
+  - The GNtemp.txt file contains temperature data, with each row representing temperature readings at different depths. The purpose of this step is to filter GNtemp.txt based on the dates extracted from the filenames of the processed .txt files in the output_txt_offset folder.
+
+
+
 
 ```python
 python Newtem.py output_txt_offset/ GNtemp.txt
 
+
 ```
+
+
 
 
 ## 3. Run ```txt_temp.py```
 
-   - **Input**: `output_txt_offset` folder and `Newtem.txt` file
-   - **Output**: `tx0_to_txt_temp` folder
+
+  - **Input**: `output_txt_offset` folder and `Newtem.txt` file
+  - **Output**: `tx0_to_txt_temp` folder
+This step processes the data files by applying temperature calibration to resistivity measurements based on the depth, using temperature data from Newtem.txt, and outputs both detailed and simplified corrected resistivity data.
+
 
 ```python
-python txt_temp.py Newtem.txt output_txt_offset/ 
+python txt_temp.py Newtem.txt output_txt_offset/
 ```
+
 
 ## 4. Run ```auto_tx0_txt_temp.py``` to automate the above process.
 
-   - **Input**: `tx0_files` folder and  `GNtemp.txt` file
-   - **Output**: `tx0_to_txt_temp` folder
+
+  - **Input**: `tx0_files` folder and  `GNtemp.txt` file
+  - **Output**: `tx0_to_txt_temp` folder
+
 
 ```python
 python auto_tx0_txt_temp.py
 ```
+
 ## 5. Math formula 
-This formula can be expressed mathematically as:
-ρ_corrected = ρ_measured * [1 + α(T - T_ref)]
-Where:
-ρ_corrected is the **corrected resistivity**
-ρ_measured is the **measured resistivity**
-α is the temperature **coefficient** (0.025 /°C in this formula)
-T is the **actual** temperature
-T_ref is the `reference` temperature (25°C in this formula)
-The specific `formula` used in the code is:
-ρ_corrected = ρ_measured * [1 + 0.025(T - 25)]
+This formula can be expressed mathematically as:<br />
+ρ_corrected = ρ_measured * [1 + α(T - T_ref)]<br />
+Where:<br />
+ρ_corrected is the corrected resistivity<br />
+ρ_measured is the measured resistivity<br />
+α is the temperature coefficient (0.025 /°C in this formula)<br />
+T is the actual temperature<br />
+T_ref is the reference temperature (25°C in this formula)<br />
+The specific formula used in the code is:<br />
+ρ_corrected = ρ_measured * [1 + 0.025(T - 25)]<br />
+
+
 
 This formula accounts for the effect of temperature on resistivity, allowing the measured resistivity to be corrected to a standard temperature (25°C in this case). The temperature coefficient of 0.025 /°C indicates that for every 1°C deviation from the reference temperature, the resistivity changes by 2.5%.
 
