@@ -1,15 +1,15 @@
 import os
 
 import pytest
-from unittest.mock import patch, Mock, call, MagicMock
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+from unittest.mock import patch, call
+from PyQt5.QtWidgets import QApplication, QMainWindow
 
 import ui_logic
 from UI import Ui_MainWindow
 from ui_logic import setup_ui_logic, start_data_processing, reset_all_fields, open_file_browser
 
 
-# 1. 创建 QApplication 实例的 fixture
+# 1. Create QApplication fixture
 @pytest.fixture(scope='module')
 def app():
     # Set the environment variable before creating QApplication
@@ -19,7 +19,7 @@ def app():
     app.exit()
 
 
-# 2. 创建 Ui_MainWindow 实例的 fixture
+# 2. Create Ui_MainWindow fixture
 @pytest.fixture
 def ui(app):
     MainWindow = QMainWindow()
@@ -32,7 +32,7 @@ def ui(app):
 
 
 def test_open_file_browser_select_tx0_files(ui):
-    # 模拟 QFileDialog.getOpenFileNames 的返回值
+    # Mock return of QFileDialog.getOpenFileNames
     with patch('PyQt5.QtWidgets.QFileDialog.getOpenFileNames', return_value=(['test.tx0'], '')):
         open_file_browser(ui.textEditProcessedTxtPreview, tx0=True)
         assert 'test.tx0' in ui.textEditProcessedTxtPreview.toPlainText()
@@ -57,7 +57,7 @@ def test_start_data_processing_without_files(ui):
         assert mock_print.mock_calls == expected_calls, f"Expected calls: {expected_calls}, but got: {mock_print.mock_calls}"
 
 def test_start_data_processing_with_files(ui):
-    """测试在选择了文件后的数据处理流程"""
+    """Mock the process with the selection of files"""
     with patch('ui_logic.global_tx0_input_folder', "dummy_folder_path"), \
          patch('ui_logic.global_selected_temperature_file', "dummy_temp_file.txt"), \
          patch('PyQt5.QtWidgets.QFileDialog.getExistingDirectory', return_value="output_dir"), \
@@ -71,8 +71,8 @@ def test_start_data_processing_with_files(ui):
 
 
 def test_reset_all_fields(ui):
-    """测试所有字段的重置功能"""
-    # 预设一些测试值
+    """Test reset function for all field in the Inversion Page"""
+    # value preset
     ui.startXLineEdit.setText("10")
     ui.startZLineEdit.setText("20")
     ui.endXLineEdit.setText("30")
@@ -84,10 +84,10 @@ def test_reset_all_fields(ui):
     ui.dPhiLineEdit.setText("90")
     ui.checkBox.setChecked(True)
 
-    # 调用 reset_all_fields 进行重置
+    # call reset_all_fields to reset
     reset_all_fields(ui)
 
-    # 验证所有字段是否重置为 0 或清空
+    # validate all fields to be 0 or clear all
     assert ui.startXLineEdit.text() == "0"
     assert ui.startZLineEdit.text() == "0"
     assert ui.endXLineEdit.text() == "0"
@@ -99,18 +99,18 @@ def test_reset_all_fields(ui):
     assert ui.dPhiLineEdit.text() == "0"
     assert not ui.checkBox.isChecked()
 
-    # 清理文本框
+    # clean text box
     assert ui.textEditProcessedTxtPreview.toPlainText() == ""
     assert ui.textEditProcessedTempPreview.toPlainText() == ""
 
 
 def test_exit_application(app, ui):
-    """测试退出应用程序"""
+    """test exit function"""
     with patch.object(QApplication, 'quit') as mock_quit:
         ui.actionExit.trigger()
         mock_quit.assert_called_once()
 
 
-# 执行测试
+# main function
 if __name__ == '__main__':
     pytest.main()

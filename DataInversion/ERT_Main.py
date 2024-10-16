@@ -94,7 +94,15 @@ def startInversion(start, end, quality, area, inversion_params, file_path, zWeig
     )
     pg.info("Filtered rhoa (min/max)", min(mgr.data["rhoa"]), max(mgr.data["rhoa"]))
     mgr.data["k"] = ert.createGeometricFactors(mgr.data, numerical=True)
-    # ert.show(mgr.data)
+
+    # Show the ERT data plot and save it
+    ert_fig, ert_ax = plt.subplots()
+    ert_plot = ert.show(mgr.data, ax=ert_ax)
+    ert_plot_filename = os.path.join(output_dir, f"ert_plot_{os.path.splitext(date)[0]}.png")
+    ert_fig.savefig(ert_plot_filename, dpi=300, bbox_inches="tight")
+    plt.close(ert_fig)
+
+    print(f"ERT plot saved as: {ert_plot_filename}")
 
     # Inversion here
     tolerance = 1  # Abort criterion for chi2 (chi-squared) for an inversion process.
@@ -138,7 +146,7 @@ def startInversion(start, end, quality, area, inversion_params, file_path, zWeig
 
     cleanup_temp_files()
 
-    return fig_filename  # Return the path of the saved figure
+    return fig_filename, ert_plot_filename  # Return the path of the saved figure
 
 
 # if __name__ == "__main__":
