@@ -1,6 +1,6 @@
 import os
 import pytest
-from Water_Content_Main import  watercomputing, cleanup_temp_files, create_mesh
+from Water_Content_Main import water_computing, cleanup_temp_files, create_mesh
 
 
 
@@ -9,7 +9,7 @@ def test_start_inversion():
     output_dir = os.path.join(current_dir, "Output")
  
     try:
-        watercomputing()
+        water_computing()
         cleanup_temp_files()
         output_files = os.listdir(output_dir)
         

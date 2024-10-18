@@ -5,9 +5,32 @@ import pandas as pd
 def extract_dates_from_filenames(data_dir):
     dates = []
     for filename in os.listdir(data_dir):
-        if filename.endswith('.txt'):
-            date_part = filename.split('_')[0]  # Assumes filenames are in the format 'YYYY-MM-DD_otherinfo.txt'
-            dates.append(date_part)
+        if filename.endswith('.txt') or filename.endswith('.tx0'):
+            parts = filename.split('_')
+            if len(parts) >= 2:
+                file_type = parts[0]
+                date_part = '_'.join(parts[1:]).split('.')[0]
+
+                if file_type == 'DD':
+                    try:
+                        date = pd.to_datetime(date_part, format='%Y_%m_%d').strftime('%Y-%m-%d')
+                        dates.append(date)
+                    except ValueError:
+                        print(f"Invalid date format in filename: {filename}")
+                elif file_type == 'WP2':
+                    try:
+                        date = pd.to_datetime(date_part, format='%d_%m_%Y').strftime('%Y-%m-%d')
+                        dates.append(date)
+                    except ValueError:
+                        print(f"Invalid date format in filename: {filename}")
+                else:
+                    try:
+                        date = pd.to_datetime(parts[0], format='%Y-%m-%d').strftime('%Y-%m-%d')
+                        dates.append(date)
+                    except ValueError:
+                        print(f"Invalid date format in filename: {filename}")
+            else:
+                print(f"Filename format is not recognized: {filename}")
     return dates
 
 
